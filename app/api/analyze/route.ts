@@ -32,15 +32,30 @@ Transcript:\n${transcript}`,
 async function checkFormulary(medications: Medication[], plan: string): Promise<FormularyResult> {
   const msg = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
+    max_tokens: 1500,
     messages: [{
       role: 'user',
-      content: `You are a pharmacy benefits expert. For the plan "${plan}", assess formulary status for: ${medications.map((m) => m.name).join(', ')}.
+      content: `You are a pharmacy benefits expert. For the plan "${plan}", assess each medication.
+
+Medications: ${medications.map((m) => m.name).join(', ')}
 
 Return ONLY JSON (no markdown):
-{"plan":"${plan}","items":[{"name":"drug","tier":"2","status":"covered|non-preferred|pa-required|not-covered|unknown","notes":""}],"paRequired":["drug"]}
+{
+  "plan": "${plan}",
+  "items": [
+    {
+      "name": "drug",
+      "tier": "1",
+      "status": "covered|non-preferred|pa-required|not-covered|unknown",
+      "notes": "e.g. step therapy required",
+      "estimatedCost": "e.g. $0-10/mo copay, $4 generic, $200+/mo brand",
+      "genericAlternative": "generic name if brand prescribed, else empty string"
+    }
+  ],
+  "paRequired": ["drug"]
+}
 
-Use typical formulary patterns. Mark status "unknown" where uncertain. Flag PA-required items in paRequired array.`,
+Use typical formulary patterns for the plan type. For unknown plans use typical commercial patterns. Mark status "unknown" where uncertain. Include realistic cost estimates including GoodRx-style cash prices where generic is available.`,
     }],
   })
   const text = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '{}'
@@ -82,7 +97,7 @@ async function synthesize(
     .join('\n\n')
 
   const prevSection = previousVisit
-    ? `\n\nPREVIOUS VISIT (${previousVisit.date}):\nPrior medications: ${previousVisit.medications.map((m) => m.name).join(', ')}\nOpen recommendations: ${previousVisit.result.recommendations.join(' | ')}\nNote any changes and whether prior recommendations appear to have been addressed.`
+    ? `\n\nPREVIOUS VISIT (${previousVisit.date}):\nPrior medications: ${previousVisit.medications.map((m) => m.name).join(', ')}\nOpen recommendations: ${previousVisit.result.recommendations.join(' | ')}\nPrior symptom scores: ${JSON.stringify(previousVisit.result.symptomScores ?? [])}\nNote changes and whether prior recommendations appear addressed.`
     : ''
 
   const formularySection = formulary?.paRequired?.length
@@ -91,11 +106,11 @@ async function synthesize(
 
   const msg = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
+    max_tokens: 3000,
     system: 'You are Cleo, a clinical decision support tool for licensed prescribers. Follow APA guidelines for psychiatric medications and standard clinical guidelines otherwise. Never prescribe — support only.',
     messages: [{
       role: 'user',
-      content: `Analyze this medication regimen and provide clinical decision support.
+      content: `Analyze this medication regimen and provide comprehensive clinical decision support.
 
 Medications: ${medList || 'none detected'}
 FDA Interaction Data:\n${fdaSections || 'None available.'}${prevSection}${formularySection}
@@ -103,7 +118,33 @@ FDA Interaction Data:\n${fdaSections || 'None available.'}${prevSection}${formul
 Transcript:\n${transcript}
 
 Return ONLY JSON (no markdown):
-{"summary":"2-3 sentence clinical summary","recommendations":["Use 'consider','may warrant review','prescriber should evaluate'"],"interactions":[{"drug1":"","drug2":"","description":"","severity":"mild|moderate|severe"}],"followUpQuestions":["q1","q2","q3"],"disclaimer":"This is AI-generated clinical decision support only. All recommendations require review by the licensed prescriber."}`,
+{
+  "summary": "2-3 sentence clinical summary",
+  "recommendations": ["Use 'consider', 'may warrant review', 'prescriber should evaluate'"],
+  "interactions": [{"drug1":"","drug2":"","description":"","severity":"mild|moderate|severe"}],
+  "adherenceFlags": [
+    {
+      "signal": "brief description of the adherence concern",
+      "quote": "exact quote from transcript if present",
+      "category": "cost|forgetting|side-effects|avoidance|other"
+    }
+  ],
+  "symptomScores": [
+    {
+      "symptom": "mood|sleep|anxiety|energy|appetite|function",
+      "score": 3,
+      "direction": "improving|stable|worsening|unknown"
+    }
+  ],
+  "nextVisitPrep": {
+    "timeframe": "e.g. 4-6 weeks",
+    "expectedOutcomes": ["What clinically to expect by next visit given current regimen"],
+    "assessmentItems": ["PHQ-9", "specific things to assess"],
+    "decisionPoints": ["If X then consider Y — titration, taper, or add-on decisions to make at next visit"]
+  },
+  "followUpQuestions": ["q1","q2","q3"],
+  "disclaimer": "This is AI-generated clinical decision support only. All recommendations require review by the licensed prescriber."
+}`,
     }],
   })
   const text = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '{}'
@@ -111,6 +152,9 @@ Return ONLY JSON (no markdown):
     summary: '',
     recommendations: [],
     interactions: [],
+    adherenceFlags: [],
+    symptomScores: [],
+    nextVisitPrep: null,
     followUpQuestions: [],
     disclaimer: 'AI-generated clinical decision support only. Not a substitute for professional medical judgment.',
   })
@@ -160,7 +204,7 @@ export async function POST(req: NextRequest) {
         const medications = await extractMedications(transcript)
         send({ step: 'extract', status: 'done', data: { medications } })
 
-        // 2. Formulary (optional)
+        // 2. Formulary (optional — now includes cost estimates)
         let formulary: FormularyResult | null = null
         if (insurancePlan?.trim()) {
           send({ step: 'formulary', status: 'running' })
@@ -181,7 +225,7 @@ export async function POST(req: NextRequest) {
         )
         send({ step: 'openfda', status: 'done', data: { found: Object.keys(fdaData).length } })
 
-        // 4. Synthesize
+        // 4. Synthesize (now outputs adherenceFlags, symptomScores, nextVisitPrep)
         send({ step: 'synthesize', status: 'running' })
         const result = await synthesize(transcript, medications, fdaData, formulary, previousVisit ?? null) as {
           recommendations?: string[]

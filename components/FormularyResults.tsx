@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FormularyResult, AnalysisResult } from '@/lib/types'
+import { AnalysisResult, FormularyResult } from '@/lib/types'
 
 const STATUS_STYLES: Record<string, string> = {
   covered: 'bg-emerald-50 text-emerald-800 border-emerald-100',
@@ -38,40 +38,60 @@ export default function FormularyResults({ formulary, result, onDraftPA, draftin
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-6">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-slate-800">Formulary Check</h3>
         <span className="text-xs text-slate-400">{formulary.plan}</span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         {formulary.items.map((item, i) => (
           <div key={i}>
-            <div className="flex items-center gap-3 py-2">
-              <span className="text-sm font-medium text-slate-700 capitalize flex-1">{item.name}</span>
-              {item.tier && (
-                <span className="text-xs text-slate-400">Tier {item.tier}</span>
-              )}
-              <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[item.status] ?? STATUS_STYLES.unknown}`}>
-                {STATUS_LABEL[item.status] ?? item.status}
-              </span>
+            <div className="flex items-start gap-3 py-2.5 border-b border-slate-50 last:border-0">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium text-slate-700 capitalize">{item.name}</span>
+                  {item.tier && (
+                    <span className="text-xs text-slate-400">Tier {item.tier}</span>
+                  )}
+                  <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${STATUS_STYLES[item.status] ?? STATUS_STYLES.unknown}`}>
+                    {STATUS_LABEL[item.status] ?? item.status}
+                  </span>
+                </div>
+
+                {/* Cost estimate */}
+                {item.estimatedCost && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    <span className="font-medium text-slate-600">Est. cost:</span> {item.estimatedCost}
+                  </p>
+                )}
+
+                {/* Generic alternative */}
+                {item.genericAlternative && (
+                  <p className="text-xs text-emerald-700 mt-0.5">
+                    Generic available: <span className="font-medium capitalize">{item.genericAlternative}</span>
+                  </p>
+                )}
+
+                {item.notes && (
+                  <p className="text-xs text-slate-400 mt-0.5">{item.notes}</p>
+                )}
+              </div>
+
               {item.status === 'pa-required' && (
                 <button
                   onClick={() => onDraftPA(item.name)}
                   disabled={!!draftingPA}
-                  className="text-xs bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-white px-2.5 py-1 rounded-lg font-medium transition-colors"
+                  className="shrink-0 text-xs bg-orange-600 hover:bg-orange-700 disabled:opacity-40 text-white px-2.5 py-1.5 rounded-lg font-medium transition-colors"
                 >
                   {draftingPA === item.name ? 'Drafting…' : 'Draft PA'}
                 </button>
               )}
             </div>
-            {item.notes && (
-              <p className="text-xs text-slate-500 ml-0 mb-1">{item.notes}</p>
-            )}
 
             {paDrafts[item.name] && (
-              <div className="mt-2 mb-3 bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <div className="my-2 bg-slate-50 border border-slate-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-slate-600">PA Letter — {item.name}</span>
+                  <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">PA Letter — {item.name}</span>
                   <button
                     onClick={() => copyLetter(item.name)}
                     className="text-xs text-blue-600 hover:text-blue-700 font-medium"

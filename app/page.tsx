@@ -7,6 +7,8 @@ import FollowUpChat from '@/components/FollowUpChat'
 import PatientPanel from '@/components/PatientPanel'
 import FormularyResults from '@/components/FormularyResults'
 import BerriesNotePanel from '@/components/BerriesNotePanel'
+import OutcomeTrends from '@/components/OutcomeTrends'
+import NextVisitPrep from '@/components/NextVisitPrep'
 import { AgentStepState, AnalysisResult, FormularyResult, Medication, Patient, Visit } from '@/lib/types'
 import { addVisit, getPatient, getPatients } from '@/lib/storage'
 
@@ -62,10 +64,7 @@ export default function Home() {
         const f = event.data as FormularyResult
         setFormulary(f)
         const paCount = f.paRequired?.length ?? 0
-        updateStep('formulary', {
-          status: 'done',
-          detail: paCount > 0 ? `${paCount} PA required` : 'All medications covered',
-        })
+        updateStep('formulary', { status: 'done', detail: paCount > 0 ? `${paCount} PA required` : 'All medications covered' })
       } else if (event.status === 'skipped') {
         updateStep('formulary', { status: 'skipped', detail: 'No insurance plan provided' })
       }
@@ -106,7 +105,9 @@ export default function Home() {
     setPaDrafts({})
     setSteps(INITIAL_STEPS)
 
-    const previousVisit = selectedPatient ? (getPatient(selectedPatient.id)?.visits[0] ?? null) : null
+    const previousVisit = selectedPatient
+      ? (getPatient(selectedPatient.id)?.visits[0] ?? null)
+      : null
 
     try {
       const res = await fetch('/api/analyze', {
@@ -136,7 +137,6 @@ export default function Home() {
           try {
             const event = JSON.parse(line.slice(6))
             handleEvent(event)
-            // capture for save
             if (event.step === 'extract' && event.status === 'done')
               finalMeds = (event.data as { medications: Medication[] }).medications
             if (event.step === 'formulary' && event.status === 'done')
@@ -146,12 +146,11 @@ export default function Home() {
             if (event.step === 'note' && event.status === 'done')
               finalNote = (event.data as { note: string }).note
           } catch {
-            // skip malformed
+            // skip malformed events
           }
         }
       }
 
-      // Save visit
       if (selectedPatient && finalResult) {
         const visit: Visit = {
           id: crypto.randomUUID(),
@@ -195,6 +194,7 @@ export default function Home() {
 
   const wordCount = transcript.split(/\s+/).filter(Boolean).length
   const showSteps = isAnalyzing || result !== null || error !== null
+  const patientVisits = selectedPatient?.visits ?? []
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -220,6 +220,21 @@ export default function Home() {
           onInsuranceChange={setInsurancePlan}
           onPatientsChange={setPatients}
         />
+
+        {/* Outcome trends — shows if patient has 2+ visits */}
+        {patientVisits.length >= 2 && (
+          <OutcomeTrends visits={patientVisits} />
+        )}
+
+        {/* Next visit prep from last visit — surfaces at top before new analysis */}
+        {!result && patientVisits[0]?.result?.nextVisitPrep && (
+          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+            <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3">
+              Carry-over from last visit ({patientVisits[0].date})
+            </p>
+            <NextVisitPrep prep={patientVisits[0].result.nextVisitPrep} />
+          </div>
+        )}
 
         {/* Transcript */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
@@ -287,6 +302,9 @@ export default function Home() {
         {result && <RecommendationOutput medications={medications} result={result} />}
 
         {berriesNote && <BerriesNotePanel note={berriesNote} />}
+
+        {/* Next visit prep from current analysis */}
+        {result?.nextVisitPrep && <NextVisitPrep prep={result.nextVisitPrep} />}
 
         {result && (
           <FollowUpChat

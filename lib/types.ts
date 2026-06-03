@@ -25,6 +25,8 @@ export interface FormularyItem {
   tier?: string
   status: 'covered' | 'non-preferred' | 'pa-required' | 'not-covered' | 'unknown'
   notes?: string
+  estimatedCost?: string
+  genericAlternative?: string
 }
 
 export interface FormularyResult {
@@ -33,10 +35,32 @@ export interface FormularyResult {
   paRequired: string[]
 }
 
+export interface AdherenceFlag {
+  signal: string
+  quote?: string
+  category: 'cost' | 'forgetting' | 'side-effects' | 'avoidance' | 'other'
+}
+
+export interface SymptomScore {
+  symptom: string
+  score: number
+  direction: 'improving' | 'stable' | 'worsening' | 'unknown'
+}
+
+export interface NextVisitPrep {
+  timeframe: string
+  expectedOutcomes: string[]
+  assessmentItems: string[]
+  decisionPoints: string[]
+}
+
 export interface AnalysisResult {
   summary: string
   recommendations: string[]
   interactions: DrugInteraction[]
+  adherenceFlags: AdherenceFlag[]
+  symptomScores: SymptomScore[]
+  nextVisitPrep: NextVisitPrep | null
   followUpQuestions: string[]
   disclaimer: string
 }
