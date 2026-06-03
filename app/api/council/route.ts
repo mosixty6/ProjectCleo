@@ -39,6 +39,16 @@ action items. What does this patient need the prescriber to hear? 3-5 bullet poi
 Focus on: metabolic effects, cardiac considerations, lab monitoring gaps, drug-disease interactions,
 and anything the psychiatric lens might miss from a whole-body standpoint. 3-5 bullet points. No intro or closing.`,
   },
+  {
+    id: 'professor',
+    name: 'Professor',
+    color: 'indigo',
+    system: `You are an attending physician and clinical educator reviewing this case for teaching purposes.
+Extract the most instructive lessons a resident-level physician should take from this encounter.
+Cover: common pitfalls this case illustrates, one or two clinical pearls grounded in evidence,
+a memorable teaching point about the drug class or clinical situation, and what a resident might
+get wrong here and why. Write for a PGY-2 or PGY-3 audience. 3-5 bullet points. No intro or closing.`,
+  },
 ]
 
 export async function POST(req: NextRequest) {

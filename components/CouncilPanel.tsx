@@ -21,6 +21,7 @@ const STYLES: Record<string, { border: string; header: string; bg: string }> = {
   green:  { border: 'border-emerald-100', header: 'text-emerald-800', bg: 'bg-emerald-50' },
   purple: { border: 'border-purple-100', header: 'text-purple-800', bg: 'bg-purple-50'  },
   orange: { border: 'border-orange-100', header: 'text-orange-800', bg: 'bg-orange-50'  },
+  indigo: { border: 'border-indigo-100', header: 'text-indigo-800', bg: 'bg-indigo-50'  },
 }
 
 const ICONS: Record<string, string> = {
@@ -28,9 +29,10 @@ const ICONS: Record<string, string> = {
   pharmacist:   '⚗️',
   advocate:     '🤝',
   internist:    '🩺',
+  professor:    '🎓',
 }
 
-const PLACEHOLDER_NAMES = ['Psychiatrist', 'Clinical Pharmacist', 'Patient Advocate', 'Internist']
+const PLACEHOLDER_NAMES = ['Psychiatrist', 'Clinical Pharmacist', 'Patient Advocate', 'Internist', 'Professor']
 
 export default function CouncilPanel({ transcript, medications, result }: Props) {
   const [loading, setLoading] = useState(false)
