@@ -2,10 +2,12 @@
 
 import { AgentStepState } from '@/lib/types'
 
-const STEP_LABELS = {
+const STEP_LABELS: Record<string, string> = {
   extract: 'Extracting medications from transcript',
+  formulary: 'Checking formulary',
   openfda: 'Checking FDA interaction database',
   synthesize: 'Generating clinical recommendations',
+  note: 'Drafting Berries note',
 }
 
 export default function AgentSteps({ steps }: { steps: AgentStepState[] }) {
@@ -19,7 +21,9 @@ export default function AgentSteps({ steps }: { steps: AgentStepState[] }) {
           <div key={step.id} className="flex items-start gap-3">
             <StepIcon status={step.status} />
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-medium ${step.status === 'pending' ? 'text-slate-400' : 'text-slate-700'}`}>
+              <p className={`text-sm font-medium ${
+                step.status === 'pending' ? 'text-slate-400' : 'text-slate-700'
+              }`}>
                 {STEP_LABELS[step.id]}
               </p>
               {step.detail && (
@@ -38,9 +42,7 @@ function StepIcon({ status }: { status: AgentStepState['status'] }) {
     return <div className="mt-0.5 w-5 h-5 rounded-full border-2 border-slate-200 shrink-0" />
   }
   if (status === 'running') {
-    return (
-      <div className="mt-0.5 w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin shrink-0" />
-    )
+    return <div className="mt-0.5 w-5 h-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin shrink-0" />
   }
   if (status === 'done') {
     return (
@@ -48,6 +50,13 @@ function StepIcon({ status }: { status: AgentStepState['status'] }) {
         <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
+      </div>
+    )
+  }
+  if (status === 'skipped') {
+    return (
+      <div className="mt-0.5 w-5 h-5 rounded-full border-2 border-slate-200 flex items-center justify-center shrink-0">
+        <div className="w-1.5 h-0.5 bg-slate-300 rounded" />
       </div>
     )
   }

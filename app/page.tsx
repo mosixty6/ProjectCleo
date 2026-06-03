@@ -1,28 +1,51 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AgentSteps from '@/components/AgentSteps'
 import RecommendationOutput from '@/components/RecommendationOutput'
 import FollowUpChat from '@/components/FollowUpChat'
-import { AgentStepState, AnalysisResult, Medication } from '@/lib/types'
+import PatientPanel from '@/components/PatientPanel'
+import FormularyResults from '@/components/FormularyResults'
+import BerriesNotePanel from '@/components/BerriesNotePanel'
+import { AgentStepState, AnalysisResult, FormularyResult, Medication, Patient, Visit } from '@/lib/types'
+import { addVisit, getPatient, getPatients } from '@/lib/storage'
 
 const INITIAL_STEPS: AgentStepState[] = [
-  { id: 'extract', label: 'Extracting medications', status: 'pending' },
-  { id: 'openfda', label: 'Checking FDA database', status: 'pending' },
-  { id: 'synthesize', label: 'Generating recommendations', status: 'pending' },
+  { id: 'extract', label: '', status: 'pending' },
+  { id: 'formulary', label: '', status: 'pending' },
+  { id: 'openfda', label: '', status: 'pending' },
+  { id: 'synthesize', label: '', status: 'pending' },
+  { id: 'note', label: '', status: 'pending' },
 ]
 
 export default function Home() {
+  // Patient
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [insurancePlan, setInsurancePlan] = useState('')
+
+  // Transcript
   const [transcript, setTranscript] = useState('')
+
+  // Analysis
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [steps, setSteps] = useState<AgentStepState[]>(INITIAL_STEPS)
   const [medications, setMedications] = useState<Medication[]>([])
+  const [formulary, setFormulary] = useState<FormularyResult | null>(null)
   const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [berriesNote, setBerriesNote] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
 
-  const updateStep = (id: string, updates: Partial<AgentStepState>) => {
+  // PA drafts
+  const [draftingPA, setDraftingPA] = useState<string | null>(null)
+  const [paDrafts, setPaDrafts] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    setPatients(getPatients())
+  }, [])
+
+  const updateStep = (id: string, updates: Partial<AgentStepState>) =>
     setSteps((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)))
-  }
 
   const handleEvent = (event: { step: string; status: string; data?: unknown; error?: string }) => {
     if (event.step === 'extract') {
@@ -30,20 +53,28 @@ export default function Home() {
       else if (event.status === 'done') {
         const { medications: meds = [] } = event.data as { medications: Medication[] }
         setMedications(meds)
-        updateStep('extract', {
+        updateStep('extract', { status: 'done', detail: `Found ${meds.length} medication${meds.length !== 1 ? 's' : ''}` })
+      }
+    }
+    if (event.step === 'formulary') {
+      if (event.status === 'running') updateStep('formulary', { status: 'running' })
+      else if (event.status === 'done') {
+        const f = event.data as FormularyResult
+        setFormulary(f)
+        const paCount = f.paRequired?.length ?? 0
+        updateStep('formulary', {
           status: 'done',
-          detail: `Found ${meds.length} medication${meds.length !== 1 ? 's' : ''}`,
+          detail: paCount > 0 ? `${paCount} PA required` : 'All medications covered',
         })
+      } else if (event.status === 'skipped') {
+        updateStep('formulary', { status: 'skipped', detail: 'No insurance plan provided' })
       }
     }
     if (event.step === 'openfda') {
       if (event.status === 'running') updateStep('openfda', { status: 'running' })
       else if (event.status === 'done') {
         const { found = 0 } = event.data as { found: number }
-        updateStep('openfda', {
-          status: 'done',
-          detail: `FDA data retrieved for ${found} medication${found !== 1 ? 's' : ''}`,
-        })
+        updateStep('openfda', { status: 'done', detail: `FDA data for ${found} medication${found !== 1 ? 's' : ''}` })
       }
     }
     if (event.step === 'synthesize') {
@@ -53,9 +84,15 @@ export default function Home() {
         updateStep('synthesize', { status: 'done', detail: 'Recommendations ready' })
       }
     }
-    if (event.step === 'error') {
-      setError(event.error ?? 'Analysis failed')
+    if (event.step === 'note') {
+      if (event.status === 'running') updateStep('note', { status: 'running' })
+      else if (event.status === 'done') {
+        const { note = '' } = event.data as { note: string }
+        setBerriesNote(note)
+        updateStep('note', { status: 'done', detail: 'Ready to paste' })
+      }
     }
+    if (event.step === 'error') setError(event.error ?? 'Analysis failed')
   }
 
   const runAnalysis = async () => {
@@ -63,14 +100,19 @@ export default function Home() {
     setIsAnalyzing(true)
     setError(null)
     setResult(null)
+    setFormulary(null)
     setMedications([])
+    setBerriesNote('')
+    setPaDrafts({})
     setSteps(INITIAL_STEPS)
+
+    const previousVisit = selectedPatient ? (getPatient(selectedPatient.id)?.visits[0] ?? null) : null
 
     try {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript }),
+        body: JSON.stringify({ transcript, insurancePlan, previousVisit }),
       })
       if (!res.ok) throw new Error(`Server error: ${res.status}`)
       const reader = res.body?.getReader()
@@ -78,6 +120,10 @@ export default function Home() {
 
       const decoder = new TextDecoder()
       let buffer = ''
+      let finalResult: AnalysisResult | null = null
+      let finalMeds: Medication[] = []
+      let finalFormulary: FormularyResult | null = null
+      let finalNote = ''
 
       while (true) {
         const { done, value } = await reader.read()
@@ -88,11 +134,37 @@ export default function Home() {
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue
           try {
-            handleEvent(JSON.parse(line.slice(6)))
+            const event = JSON.parse(line.slice(6))
+            handleEvent(event)
+            // capture for save
+            if (event.step === 'extract' && event.status === 'done')
+              finalMeds = (event.data as { medications: Medication[] }).medications
+            if (event.step === 'formulary' && event.status === 'done')
+              finalFormulary = event.data as FormularyResult
+            if (event.step === 'synthesize' && event.status === 'done')
+              finalResult = event.data as AnalysisResult
+            if (event.step === 'note' && event.status === 'done')
+              finalNote = (event.data as { note: string }).note
           } catch {
-            // skip malformed events
+            // skip malformed
           }
         }
+      }
+
+      // Save visit
+      if (selectedPatient && finalResult) {
+        const visit: Visit = {
+          id: crypto.randomUUID(),
+          date: new Date().toLocaleDateString(),
+          medications: finalMeds,
+          result: finalResult,
+          formulary: finalFormulary ?? undefined,
+          berriesNote: finalNote,
+        }
+        addVisit(selectedPatient.id, visit)
+        const updated = getPatients()
+        setPatients(updated)
+        setSelectedPatient(updated.find((p) => p.id === selectedPatient.id) ?? null)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Analysis failed')
@@ -101,8 +173,28 @@ export default function Home() {
     }
   }
 
-  const showSteps = isAnalyzing || result !== null || error !== null
+  const draftPA = async (medication: string) => {
+    if (!result) return
+    setDraftingPA(medication)
+    try {
+      const res = await fetch('/api/draft-pa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          medication,
+          diagnosis: result.summary,
+          clinicalJustification: result.recommendations.join('; '),
+        }),
+      })
+      const data = await res.json()
+      setPaDrafts((prev) => ({ ...prev, [medication]: data.letter }))
+    } finally {
+      setDraftingPA(null)
+    }
+  }
+
   const wordCount = transcript.split(/\s+/).filter(Boolean).length
+  const showSteps = isAnalyzing || result !== null || error !== null
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -119,7 +211,17 @@ export default function Home() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-8 space-y-5">
-        {/* Transcript input */}
+        {/* Patient + insurance */}
+        <PatientPanel
+          patients={patients}
+          selected={selectedPatient}
+          insurancePlan={insurancePlan}
+          onSelect={setSelectedPatient}
+          onInsuranceChange={setInsurancePlan}
+          onPatientsChange={setPatients}
+        />
+
+        {/* Transcript */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <label className="block">
             <span className="text-sm font-semibold text-slate-700 block mb-1">Paste Transcript</span>
@@ -160,7 +262,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Error state */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
             <span className="text-red-500 shrink-0 font-bold">✕</span>
@@ -171,13 +272,22 @@ export default function Home() {
           </div>
         )}
 
-        {/* Agent steps */}
         {showSteps && <AgentSteps steps={steps} />}
 
-        {/* Results */}
+        {formulary && result && (
+          <FormularyResults
+            formulary={formulary}
+            result={result}
+            onDraftPA={draftPA}
+            draftingPA={draftingPA}
+            paDrafts={paDrafts}
+          />
+        )}
+
         {result && <RecommendationOutput medications={medications} result={result} />}
 
-        {/* Follow-up chat */}
+        {berriesNote && <BerriesNotePanel note={berriesNote} />}
+
         {result && (
           <FollowUpChat
             analysisContext={{ medications, result }}
