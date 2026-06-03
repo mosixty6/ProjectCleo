@@ -9,6 +9,7 @@ import FormularyResults from '@/components/FormularyResults'
 import BerriesNotePanel from '@/components/BerriesNotePanel'
 import OutcomeTrends from '@/components/OutcomeTrends'
 import NextVisitPrep from '@/components/NextVisitPrep'
+import CouncilPanel from '@/components/CouncilPanel'
 import { AgentStepState, AnalysisResult, FormularyResult, Medication, Patient, Visit } from '@/lib/types'
 import { addVisit, getPatient, getPatients } from '@/lib/storage'
 
@@ -300,6 +301,14 @@ export default function Home() {
         )}
 
         {result && <RecommendationOutput medications={medications} result={result} />}
+
+        {result && (
+          <CouncilPanel
+            transcript={transcript}
+            medications={medications}
+            result={result}
+          />
+        )}
 
         {berriesNote && <BerriesNotePanel note={berriesNote} />}
 
