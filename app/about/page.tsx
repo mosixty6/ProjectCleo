@@ -53,14 +53,11 @@ export default function About() {
             <div className="mt-8 pt-8 border-t border-stone-200">
               <h2 className="font-serif text-2xl text-slate-800 mb-4">Training &amp; Credentials</h2>
               <ul className="space-y-2 text-slate-600 text-sm">
-                <li>MD — <span className="text-stone-400">[Medical School]</span></li>
-                <li>Psychiatry Residency — <span className="text-stone-400">[Program]</span></li>
+                <li>MD — SUNY Downstate Medical Center</li>
+                <li>Psychiatry Residency — Harvard Medical School / Brigham and Women&apos;s Hospital</li>
                 <li>Board Certified, American Board of Psychiatry and Neurology</li>
                 <li>Licensed in Florida</li>
               </ul>
-              <p className="text-xs text-stone-400 mt-4 italic">
-                * Placeholder — fill in training institutions before publishing.
-              </p>
             </div>
           </div>
 
