@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Nishant K. Gupta, MD — Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  h1, h2, h3, h4 { font-family: 'Cormorant Garamond', Georgia, serif; }
+  .page { display: none; }
+  .page.active { display: block; }
+</style>
+</head>
+<body class="bg-stone-50 text-slate-800 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-stone-50 border-b border-stone-200">
+  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+    <button onclick="showPage('home')" class="font-serif text-lg font-medium text-slate-800 tracking-wide hover:text-slate-600 transition-colors">
+      Nishant K. Gupta, MD
+    </button>
+    <div class="flex items-center gap-6 text-sm text-slate-600">
+      <button onclick="showPage('about')" class="hover:text-slate-900 transition-colors">About</button>
+      <button onclick="showPage('services')" class="hover:text-slate-900 transition-colors">Services</button>
+      <button onclick="showPage('faq')" class="hover:text-slate-900 transition-colors">FAQ</button>
+      <button onclick="showPage('contact')" class="hover:text-slate-900 transition-colors">Contact</button>
+      <span class="bg-slate-800 text-stone-50 px-4 py-2 rounded text-sm">(929) 609-4465</span>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE: HOME -->
+<div id="page-home" class="page active pt-20">
+  <section class="max-w-5xl mx-auto px-6 pt-20 pb-24">
+    <div class="max-w-2xl">
+      <p class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-6">Private Practice — Orlando, FL</p>
+      <h1 class="text-5xl md:text-6xl font-serif font-medium text-slate-800 leading-tight mb-6">Psychiatry for cases that require more.</h1>
+      <p class="text-lg text-slate-600 leading-relaxed mb-10 max-w-xl">Complex presentations, geriatric care, and difficult diagnostic questions — handled thoughtfully, with full attention to your privacy.</p>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <span class="inline-flex items-center justify-center bg-slate-800 text-stone-50 px-7 py-3.5 rounded text-sm font-medium">Call to Schedule — (929) 609-4465</span>
+        <button onclick="showPage('faq')" class="inline-flex items-center justify-center border border-stone-300 text-slate-700 px-7 py-3.5 rounded text-sm font-medium hover:border-stone-400">Common Questions</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-20">
+    <div class="grid md:grid-cols-2 gap-14 items-start">
+      <div>
+        <h2 class="text-3xl font-serif font-medium text-slate-800 mb-5">A different kind of practice.</h2>
+        <p class="text-slate-600 leading-relaxed mb-4">Most psychiatric practices are built for volume. Fifteen-minute appointments, rushed histories, diagnoses that get assigned in the first session. That model works for straightforward cases. It fails the rest.</p>
+        <p class="text-slate-600 leading-relaxed mb-4">This practice is built for the rest — patients with years of diagnoses that don't quite fit, medication trials that haven't worked, and presentations that require a longer look. Older adults navigating the intersection of medical illness, cognitive change, and psychiatric symptoms.</p>
+        <p class="text-slate-600 leading-relaxed mb-6">Cash pay, no insurance panels, no electronic health record shared across systems. Your care stays between us.</p>
+        <button onclick="showPage('about')" class="text-sm font-medium text-slate-700 underline underline-offset-4 hover:text-slate-900">More about my approach →</button>
+      </div>
+      <div class="space-y-4">
+        <div class="bg-white border border-stone-200 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-1">Locations</p>
+          <p class="font-serif text-xl text-slate-800 mb-1">Winter Park &amp; Baldwin Park</p>
+          <p class="text-sm text-slate-500">Orlando, Florida</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-1">Telehealth</p>
+          <p class="font-serif text-xl text-slate-800 mb-1">Available statewide</p>
+          <p class="text-sm text-slate-500">Florida-licensed patients</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-1">Scheduling</p>
+          <p class="font-serif text-xl text-slate-800 mb-1">By phone only</p>
+          <p class="text-sm text-slate-500">No online forms. No data collected.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-20">
+    <p class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-4">Areas of Focus</p>
+    <h2 class="text-3xl font-serif font-medium text-slate-800 mb-12">Conditions I treat</h2>
+    <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Major Depression</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Treatment-resistant presentations, late-life depression, and cases complicated by medical illness.</p>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Bipolar Disorder</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Complex mood histories, diagnostic clarification, and long-term medication management.</p>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Anxiety Disorders</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Generalized anxiety, panic, and anxiety secondary to medical or cognitive conditions.</p>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Dementia &amp; Memory</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">Behavioral symptoms of dementia, caregiver guidance, and early cognitive decline evaluation.</p>
+      </div>
+    </div>
+    <div class="mt-8">
+      <button onclick="showPage('services')" class="text-sm font-medium text-slate-700 underline underline-offset-4 hover:text-slate-900">View services and fees →</button>
+    </div>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-20">
+    <div class="max-w-2xl">
+      <p class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-4">Privacy</p>
+      <h2 class="text-3xl font-serif font-medium text-slate-800 mb-5">Your records stay private.</h2>
+      <p class="text-slate-600 leading-relaxed mb-4">This practice does not participate in insurance networks and does not use a shared electronic health record. Scheduling is by phone — no intake forms, no patient portals, no third-party data processors.</p>
+      <p class="text-slate-600 leading-relaxed mb-8">For patients who are professionals, executives, or anyone with reason to keep their psychiatric care off the record, this matters. Superbills are available for those who choose to seek out-of-network reimbursement from their own insurer.</p>
+      <button onclick="showPage('faq')" class="text-sm font-medium text-slate-700 underline underline-offset-4 hover:text-slate-900">Read the FAQ →</button>
+    </div>
+  </section>
+
+  <section class="bg-slate-800 text-stone-50 py-20">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-serif font-medium mb-4">Ready to schedule?</h2>
+      <p class="text-stone-300 mb-8 max-w-md mx-auto text-sm leading-relaxed">Call during business hours. If I don't answer, leave a message and I'll return your call within one business day.</p>
+      <span class="inline-flex items-center justify-center bg-stone-50 text-slate-800 px-8 py-4 rounded text-sm font-medium">(929) 609-4465</span>
+    </div>
+  </section>
+
+  <footer class="bg-slate-800 text-stone-300 py-14">
+    <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-10">
+      <div>
+        <p class="font-serif text-stone-100 text-xl mb-1">Nishant K. Gupta, MD</p>
+        <p class="text-sm text-stone-400">Private Psychiatric Practice</p>
+        <p class="text-sm text-stone-400 mt-1">Winter Park &amp; Baldwin Park — Orlando, FL</p>
+      </div>
+      <div>
+        <p class="text-sm font-medium text-stone-200 mb-2">To Schedule</p>
+        <span class="text-stone-100 text-sm">(929) 609-4465</span>
+        <p class="text-xs text-stone-500 mt-3">Cash pay only. Superbills available.</p>
+        <p class="text-xs text-stone-500">No online scheduling. No data collection.</p>
+      </div>
+      <div class="text-xs text-stone-500">
+        <p>© 2026 Nishant K. Gupta, MD</p>
+        <p class="mt-1">This site does not collect personal information.</p>
+        <p class="mt-1">Winter Park, FL | Baldwin Park, FL | Telehealth, FL</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- PAGE: ABOUT -->
+<div id="page-about" class="page pt-20">
+  <section class="max-w-5xl mx-auto px-6 pt-20 pb-16">
+    <p class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-6">About</p>
+    <h1 class="text-5xl font-serif font-medium text-slate-800 leading-tight mb-6 max-w-2xl">Nishant K. Gupta, MD</h1>
+    <p class="text-lg text-slate-500 max-w-xl leading-relaxed">Board-certified psychiatrist. Private practice in Winter Park and Baldwin Park, Orlando.</p>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <div class="grid md:grid-cols-3 gap-12">
+      <div class="md:col-span-2 space-y-6 text-slate-600 leading-relaxed">
+        <p>I trained in psychiatry because I was drawn to the cases that didn't resolve cleanly — the patient whose depression hadn't responded to three antidepressants, the older adult whose behavioral changes were being attributed to "just aging," the person who had been told their anxiety was untreatable. These are the patients who tend to fall through the cracks of high-volume practice.</p>
+        <p>My clinical focus is on complex mood and anxiety disorders, with particular attention to older adults. Geriatric psychiatry demands a different kind of thinking — polypharmacy, medical comorbidity, cognitive overlay, caregiver dynamics. I find that work genuinely interesting, and it's where I can be most useful.</p>
+        <p>I practice privately and independently. That means longer appointments, a thorough history before any conclusions, and the ability to revisit a diagnosis when the evidence calls for it. It also means your records stay with me — not in a shared hospital system, not accessible to an insurance reviewer, not attached to your name in a database you didn't choose.</p>
+        <p>If you are a professional, executive, or anyone for whom privacy in psychiatric care is not a preference but a necessity, this practice was built with that in mind.</p>
+
+        <div class="mt-8 pt-8 border-t border-stone-200">
+          <h2 class="font-serif text-2xl text-slate-800 mb-4">Training &amp; Credentials</h2>
+          <ul class="space-y-2 text-slate-600 text-sm">
+            <li>MD — SUNY Downstate Medical Center</li>
+            <li>Psychiatry Residency — Harvard Medical School / Brigham and Women's Hospital</li>
+            <li>Board Certified, American Board of Psychiatry and Neurology</li>
+            <li>Licensed in Florida</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-white border border-stone-200 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-3">In Practice</p>
+          <ul class="space-y-3 text-sm text-slate-600">
+            <li>Complex mood disorders</li>
+            <li>Geriatric psychiatry</li>
+            <li>Treatment-resistant depression</li>
+            <li>Dementia behavioral symptoms</li>
+            <li>Anxiety disorders</li>
+            <li>Diagnostic clarification</li>
+          </ul>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-3">Practice Philosophy</p>
+          <ul class="space-y-3 text-sm text-slate-600">
+            <li>Cash pay only</li>
+            <li>No insurance panels</li>
+            <li>No shared EHR</li>
+            <li>Superbills available</li>
+            <li>Phone scheduling only</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <div class="flex flex-col sm:flex-row gap-4">
+      <span class="inline-flex items-center justify-center bg-slate-800 text-stone-50 px-7 py-3.5 rounded text-sm font-medium">Call to Schedule — (929) 609-4465</span>
+      <button onclick="showPage('faq')" class="inline-flex items-center justify-center border border-stone-300 text-slate-700 px-7 py-3.5 rounded text-sm font-medium">Common Questions</button>
+    </div>
+  </section>
+
+  <footer class="bg-slate-800 text-stone-300 py-14 mt-8">
+    <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-10">
+      <div><p class="font-serif text-stone-100 text-xl mb-1">Nishant K. Gupta, MD</p><p class="text-sm text-stone-400">Private Psychiatric Practice</p></div>
+      <div><p class="text-sm font-medium text-stone-200 mb-2">To Schedule</p><span class="text-stone-100 text-sm">(929) 609-4465</span></div>
+      <div class="text-xs text-stone-500"><p>© 2026 Nishant K. Gupta, MD</p><p class="mt-1">This site does not collect personal information.</p></div>
+    </div>
+  </footer>
+</div>
+
+<!-- PAGE: SERVICES -->
+<div id="page-services" class="page pt-20">
+  <section class="max-w-5xl mx-auto px-6 pt-20 pb-16">
+    <p class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-6">Services</p>
+    <h1 class="text-5xl font-serif font-medium text-slate-800 leading-tight mb-6 max-w-2xl">What to expect</h1>
+    <p class="text-lg text-slate-500 max-w-xl leading-relaxed">Private psychiatric care in Winter Park and Baldwin Park. In-person and telehealth available. Cash pay, superbills provided.</p>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <h2 class="text-3xl font-serif font-medium text-slate-800 mb-10">Fees</h2>
+    <div class="grid md:grid-cols-2 gap-6 mb-10">
+      <div class="bg-white border border-stone-200 rounded-lg p-8">
+        <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-4">Initial Evaluation</p>
+        <p class="font-serif text-4xl text-slate-800 mb-2">$400</p>
+        <p class="text-sm text-stone-500 mb-6">60 minutes</p>
+        <p class="text-sm text-slate-600 leading-relaxed">A thorough psychiatric history — chief complaint, present illness, past psychiatric and medical history, family history, social context, and medications. The goal is a complete picture before any conclusions, not a diagnosis in the first 20 minutes.</p>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-lg p-8">
+        <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-4">Follow-Up Visit</p>
+        <p class="font-serif text-4xl text-slate-800 mb-2">$200</p>
+        <p class="text-sm text-stone-500 mb-6">30 minutes</p>
+        <p class="text-sm text-slate-600 leading-relaxed">Interval follow-up for medication management, symptom review, and any adjustments. Frequency is determined by clinical need — not by insurance requirements or administrative defaults.</p>
+      </div>
+    </div>
+    <div class="bg-stone-100 rounded-lg p-6 text-sm text-slate-600 leading-relaxed max-w-2xl">
+      <p class="font-medium text-slate-700 mb-2">Insurance &amp; Superbills</p>
+      <p>This practice does not accept insurance. Payment is due at time of service. A superbill is provided upon request so you can submit for out-of-network reimbursement directly with your insurer. Many PPO plans reimburse a portion of out-of-network psychiatric care; check your benefits before your first appointment.</p>
+    </div>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <h2 class="text-3xl font-serif font-medium text-slate-800 mb-10">Conditions treated</h2>
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-4">Major Depressive Disorder</h3>
+        <ul class="space-y-2">
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Treatment-resistant and recurrent depression</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Late-life and geriatric depression</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Depression complicating medical illness</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Medication optimization and augmentation</span></li>
+        </ul>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-4">Bipolar Disorder</h3>
+        <ul class="space-y-2">
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Bipolar I and II, diagnostic clarification</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Complex mood histories with multiple prior diagnoses</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Long-term mood stabilization</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Medication management in older adults</span></li>
+        </ul>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-4">Anxiety Disorders</h3>
+        <ul class="space-y-2">
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Generalized anxiety disorder</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Panic disorder</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Anxiety secondary to medical conditions</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Anxiety in the context of cognitive decline</span></li>
+        </ul>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-lg p-6">
+        <h3 class="font-serif text-xl text-slate-800 mb-4">Dementia &amp; Cognitive Disorders</h3>
+        <ul class="space-y-2">
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Behavioral and psychiatric symptoms of dementia</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Early cognitive decline evaluation</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Caregiver consultation and guidance</span></li>
+          <li class="text-sm text-slate-500 flex gap-2"><span class="text-stone-300 mt-0.5">—</span><span>Differential diagnosis of cognitive change</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-slate-800 text-stone-50 py-20">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <h2 class="text-3xl font-serif font-medium mb-4">Schedule an evaluation</h2>
+      <p class="text-stone-300 mb-8 max-w-sm mx-auto text-sm">Call to schedule. New patient availability is limited.</p>
+      <span class="inline-flex items-center justify-center bg-stone-50 text-slate-800 px-8 py-4 rounded text-sm font-medium">(929) 609-4465</span>
+    </div>
+  </section>
+
+  <footer class="bg-slate-800 text-stone-300 py-14">
+    <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-10">
+      <div><p class="font-serif text-stone-100 text-xl mb-1">Nishant K. Gupta, MD</p><p class="text-sm text-stone-400">Private Psychiatric Practice</p></div>
+      <div><p class="text-sm font-medium text-stone-200 mb-2">To Schedule</p><span class="text-stone-100 text-sm">(929) 609-4465</span></div>
+      <div class="text-xs text-stone-500"><p>© 2026 Nishant K. Gupta, MD</p></div>
+    </div>
+  </footer>
+</div>
+
+<!-- PAGE: FAQ -->
+<div id="page-faq" class="page pt-20">
+  <section class="max-w-5xl mx-auto px-6 pt-20 pb-16">
+    <p class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-6">FAQ</p>
+    <h1 class="text-5xl font-serif font-medium text-slate-800 leading-tight mb-6 max-w-2xl">Common questions</h1>
+    <p class="text-lg text-slate-500 max-w-xl leading-relaxed">Answers to what most people want to know before calling.</p>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-3xl mx-auto px-6 py-16">
+
+    <h2 class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-8">Scheduling</h2>
+    <div class="space-y-8 mb-14">
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">How do I schedule an appointment?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">By phone only. Call (929) 609-4465 during business hours. If I don't answer, leave a message with your name, a brief description of what you're seeking, and the best number to reach you. I return calls within one business day. There is no online scheduling, no patient portal, and no intake forms — by design.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Are you accepting new patients?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">Availability is limited. Call to inquire about current openings. I do not maintain a waiting list.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">What is your cancellation policy?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">Please give at least 48 hours notice if you need to cancel or reschedule. Late cancellations and no-shows are charged the full session fee.</p>
+      </div>
+    </div>
+
+    <h2 class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-8">Fees &amp; Insurance</h2>
+    <div class="space-y-8 mb-14">
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Do you accept insurance?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">No. This is a cash-pay practice. I do not participate in any insurance networks, including Medicare and Medicaid. Payment is due at the time of service.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">What do you charge?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">Initial evaluation (60 minutes): $400. Follow-up visit (30 minutes): $200. Payment is accepted by check, cash, or credit card.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">What is a superbill, and can I get one?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">A superbill is an itemized receipt that includes your diagnosis, the procedure performed, and the relevant billing codes. You can submit it to your insurance company to request out-of-network reimbursement. I provide superbills on request. Many PPO plans cover a portion of out-of-network psychiatric care — check your benefits before your first appointment.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Why cash pay? Isn't that a barrier?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">It is, for some patients — and I don't minimize that. For others, the privacy and clinical independence that come with cash pay are worth the cost. Insurance participation requires using a shared EHR, filing claims that create a permanent record, and accepting oversight of clinical decisions. This practice is built for patients who want something different.</p>
+      </div>
+    </div>
+
+    <h2 class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-8">Privacy</h2>
+    <div class="space-y-8 mb-14">
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">How is my privacy protected?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">This practice does not use a shared or hospital-affiliated electronic health record. Your records are maintained privately and are not accessible to insurance companies, hospital systems, or other providers unless you provide explicit written authorization. Scheduling is by phone only — no online forms, no patient portal, no third-party data processors.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Will my employer or insurer be able to see that I've been seen here?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">If you pay cash and do not submit a superbill, there is no insurance claim and no record in any insurance database. Your employer has no access to your medical records. The only way your records leave this practice is with your written authorization, or as required by law.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Do you do FMLA paperwork or disability evaluations?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">I can complete FMLA paperwork and certain disability-related documentation for established patients. There is an administrative fee for these services. I do not perform forensic evaluations for legal proceedings.</p>
+      </div>
+    </div>
+
+    <h2 class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-8">Clinical</h2>
+    <div class="space-y-8">
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">What conditions do you treat?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">Major depressive disorder, bipolar disorder, anxiety disorders, and dementia-related psychiatric symptoms. I focus on complex presentations — patients with long histories, multiple prior treatments, or diagnoses that don't fully account for their symptoms. I do not treat schizophrenia, active substance use disorders, eating disorders, or childhood/adolescent psychiatric conditions.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Do you do therapy, or only medication management?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">Primarily medication management and psychiatric evaluation. Appointments include supportive discussion, but I do not provide formal psychotherapy. I can refer to therapists who work well with the patient populations I see.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">Do you prescribe controlled substances?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">Yes, when clinically indicated. Stimulants for ADHD and benzodiazepines for anxiety or situational use may be prescribed as part of a comprehensive treatment plan. I do not prescribe controlled substances at the initial visit or without a thorough evaluation.</p>
+      </div>
+      <div class="border-b border-stone-200 pb-8">
+        <h3 class="font-serif text-xl text-slate-800 mb-3">I've seen multiple psychiatrists and nothing has worked. Is this the right practice?</h3>
+        <p class="text-slate-600 leading-relaxed text-sm">Possibly. Treatment-resistant presentations, diagnostic uncertainty, and histories of partial or failed responses are exactly what I spend most of my time on. The first step is an honest evaluation — which sometimes confirms a previous diagnosis and sometimes doesn't.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-slate-800 text-stone-50 py-20">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <h2 class="text-3xl font-serif font-medium mb-4">Still have questions?</h2>
+      <p class="text-stone-300 mb-8 max-w-sm mx-auto text-sm">Call and I'll answer directly.</p>
+      <span class="inline-flex items-center justify-center bg-stone-50 text-slate-800 px-8 py-4 rounded text-sm font-medium">(929) 609-4465</span>
+    </div>
+  </section>
+
+  <footer class="bg-slate-800 text-stone-300 py-14">
+    <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-10">
+      <div><p class="font-serif text-stone-100 text-xl mb-1">Nishant K. Gupta, MD</p><p class="text-sm text-stone-400">Private Psychiatric Practice</p></div>
+      <div><p class="text-sm font-medium text-stone-200 mb-2">To Schedule</p><span class="text-stone-100 text-sm">(929) 609-4465</span></div>
+      <div class="text-xs text-stone-500"><p>© 2026 Nishant K. Gupta, MD</p></div>
+    </div>
+  </footer>
+</div>
+
+<!-- PAGE: CONTACT -->
+<div id="page-contact" class="page pt-20">
+  <section class="max-w-5xl mx-auto px-6 pt-20 pb-16">
+    <p class="text-xs font-medium tracking-widest text-stone-500 uppercase mb-6">Contact</p>
+    <h1 class="text-5xl font-serif font-medium text-slate-800 leading-tight mb-6 max-w-2xl">To schedule, call.</h1>
+    <p class="text-lg text-slate-500 max-w-xl leading-relaxed">No online forms, no patient portal, no email — by design. A phone call is the right way to start.</p>
+  </section>
+
+  <div class="border-t border-stone-200"></div>
+
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <div class="grid md:grid-cols-2 gap-12">
+      <div>
+        <div class="mb-10">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-4">Phone</p>
+          <p class="font-serif text-4xl text-slate-800">(929) 609-4465</p>
+          <p class="text-sm text-slate-500 mt-3 leading-relaxed">If I don't answer, leave a message with your name, a brief description of what you're seeking, and the best number to reach you. I return calls within one business day.</p>
+        </div>
+        <div class="space-y-6">
+          <div>
+            <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-2">Winter Park</p>
+            <p class="text-sm text-slate-600">Orlando, FL — in-person available</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-2">Baldwin Park</p>
+            <p class="text-sm text-slate-600">Orlando, FL — in-person available</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-2">Telehealth</p>
+            <p class="text-sm text-slate-600">Available for Florida-licensed patients</p>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <div class="bg-white border border-stone-200 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-3">What to mention when you call</p>
+          <ul class="space-y-2 text-sm text-slate-600">
+            <li class="flex gap-2"><span class="text-stone-300 mt-0.5 shrink-0">—</span><span>Your name and best callback number</span></li>
+            <li class="flex gap-2"><span class="text-stone-300 mt-0.5 shrink-0">—</span><span>What you're seeking help with (brief)</span></li>
+            <li class="flex gap-2"><span class="text-stone-300 mt-0.5 shrink-0">—</span><span>Whether you prefer in-person or telehealth</span></li>
+            <li class="flex gap-2"><span class="text-stone-300 mt-0.5 shrink-0">—</span><span>Your general availability for a first appointment</span></li>
+          </ul>
+        </div>
+        <div class="bg-stone-100 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-3">Privacy note</p>
+          <p class="text-sm text-slate-600 leading-relaxed">This practice does not use online scheduling, intake forms, or patient portals. No personal health information is collected through this website. Scheduling by phone is intentional — not a limitation.</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-lg p-6">
+          <p class="text-xs font-medium tracking-widest text-stone-400 uppercase mb-3">Fees (for reference)</p>
+          <div class="space-y-2 text-sm text-slate-600">
+            <div class="flex justify-between"><span>Initial evaluation (60 min)</span><span class="font-medium text-slate-800">$400</span></div>
+            <div class="flex justify-between"><span>Follow-up (30 min)</span><span class="font-medium text-slate-800">$200</span></div>
+            <p class="text-xs text-stone-400 mt-3">Cash pay. Superbills available for OON reimbursement.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-slate-800 text-stone-300 py-14 mt-8">
+    <div class="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-10">
+      <div><p class="font-serif text-stone-100 text-xl mb-1">Nishant K. Gupta, MD</p><p class="text-sm text-stone-400">Private Psychiatric Practice</p></div>
+      <div><p class="text-sm font-medium text-stone-200 mb-2">To Schedule</p><span class="text-stone-100 text-sm">(929) 609-4465</span></div>
+      <div class="text-xs text-stone-500"><p>© 2026 Nishant K. Gupta, MD</p><p class="mt-1">This site does not collect personal information.</p></div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>
