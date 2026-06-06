@@ -11,7 +11,7 @@ export interface DrugInteraction {
   severity: 'mild' | 'moderate' | 'severe'
 }
 
-export type AgentStepId = 'extract' | 'formulary' | 'openfda' | 'synthesize' | 'note'
+export type AgentStepId = 'extract' | 'formulary' | 'openfda' | 'synthesize' | 'note' | 'psych'
 
 export interface AgentStepState {
   id: AgentStepId
@@ -77,6 +77,7 @@ export interface Visit {
   result: AnalysisResult
   formulary?: FormularyResult
   berriesNote?: string
+  psychAssessment?: PsychAssessment
 }
 
 export interface Patient {
@@ -89,4 +90,44 @@ export interface Patient {
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
+}
+
+export interface DSMDiagnosis {
+  name: string
+  icd10: string
+  confidence: 'high' | 'moderate' | 'low'
+  criteriaEvidence: string[]
+}
+
+export interface MedProtocol {
+  medication: string
+  indication: string
+  currentDose: string
+  targetDoseRange: string
+  titrationNote: string
+  doseStatus: 'sub-therapeutic' | 'therapeutic' | 'above-guideline' | 'unknown'
+  lineOfTreatment: '1st' | '2nd' | '3rd' | 'augmentation'
+  monitoringRequired: string[]
+  commonSideEffects: string[]
+}
+
+export interface DetectedScale {
+  scale: string
+  score: number
+  severity: string
+  interpretation: string
+}
+
+export interface PsychAssessment {
+  diagnoses: DSMDiagnosis[]
+  treatmentResistance: string | null
+  protocols: MedProtocol[]
+  labsRequired: string[]
+  detectedScales: DetectedScale[]
+  cptCodes: {
+    primary: string
+    description: string
+    rationale: string
+    addOns: string[]
+  }
 }

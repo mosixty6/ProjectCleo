@@ -10,7 +10,8 @@ import BerriesNotePanel from '@/components/BerriesNotePanel'
 import OutcomeTrends from '@/components/OutcomeTrends'
 import NextVisitPrep from '@/components/NextVisitPrep'
 import CouncilPanel from '@/components/CouncilPanel'
-import { AgentStepState, AnalysisResult, FormularyResult, Medication, Patient, Visit } from '@/lib/types'
+import PsychPanel from '@/components/PsychPanel'
+import { AgentStepState, AnalysisResult, FormularyResult, Medication, Patient, PsychAssessment, Visit } from '@/lib/types'
 import { addVisit, getPatient, getPatients } from '@/lib/storage'
 
 const INITIAL_STEPS: AgentStepState[] = [
@@ -19,6 +20,7 @@ const INITIAL_STEPS: AgentStepState[] = [
   { id: 'openfda', label: '', status: 'pending' },
   { id: 'synthesize', label: '', status: 'pending' },
   { id: 'note', label: '', status: 'pending' },
+  { id: 'psych', label: '', status: 'pending' },
 ]
 
 export default function Home() {
@@ -38,6 +40,9 @@ export default function Home() {
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [berriesNote, setBerriesNote] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
+
+  // Psych assessment
+  const [psychAssessment, setPsychAssessment] = useState<PsychAssessment | null>(null)
 
   // PA drafts
   const [draftingPA, setDraftingPA] = useState<string | null>(null)
@@ -92,6 +97,15 @@ export default function Home() {
         updateStep('note', { status: 'done', detail: 'Ready to paste' })
       }
     }
+    if (event.step === 'psych') {
+      if (event.status === 'running') updateStep('psych', { status: 'running' })
+      else if (event.status === 'done') {
+        setPsychAssessment(event.data as PsychAssessment)
+        const pa = event.data as PsychAssessment
+        const dxCount = pa.diagnoses?.length ?? 0
+        updateStep('psych', { status: 'done', detail: dxCount > 0 ? `${dxCount} diagnosis${dxCount !== 1 ? 'es' : ''} · protocols ready` : 'Protocols ready' })
+      }
+    }
     if (event.step === 'error') setError(event.error ?? 'Analysis failed')
   }
 
@@ -104,6 +118,7 @@ export default function Home() {
     setMedications([])
     setBerriesNote('')
     setPaDrafts({})
+    setPsychAssessment(null)
     setSteps(INITIAL_STEPS)
 
     const previousVisit = selectedPatient
@@ -126,6 +141,7 @@ export default function Home() {
       let finalMeds: Medication[] = []
       let finalFormulary: FormularyResult | null = null
       let finalNote = ''
+      let finalPsych: PsychAssessment | null = null
 
       while (true) {
         const { done, value } = await reader.read()
@@ -146,6 +162,8 @@ export default function Home() {
               finalResult = event.data as AnalysisResult
             if (event.step === 'note' && event.status === 'done')
               finalNote = (event.data as { note: string }).note
+            if (event.step === 'psych' && event.status === 'done')
+              finalPsych = event.data as PsychAssessment
           } catch {
             // skip malformed events
           }
@@ -160,6 +178,7 @@ export default function Home() {
           result: finalResult,
           formulary: finalFormulary ?? undefined,
           berriesNote: finalNote,
+          psychAssessment: finalPsych ?? undefined,
         }
         addVisit(selectedPatient.id, visit)
         const updated = getPatients()
@@ -301,6 +320,8 @@ export default function Home() {
         )}
 
         {result && <RecommendationOutput medications={medications} result={result} />}
+
+        {psychAssessment && <PsychPanel assessment={psychAssessment} />}
 
         {result && (
           <CouncilPanel

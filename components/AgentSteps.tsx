@@ -8,6 +8,7 @@ const STEP_LABELS: Record<string, string> = {
   openfda: 'Checking FDA interaction database',
   synthesize: 'Generating clinical recommendations',
   note: 'Drafting Berries note',
+  psych: 'Running psychiatric assessment (DSM-5 · Protocols · CPT)',
 }
 
 export default function AgentSteps({ steps }: { steps: AgentStepState[] }) {

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { FormularyResult, Medication, Visit } from '@/lib/types'
+import { FormularyResult, Medication, PsychAssessment, Visit } from '@/lib/types'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -184,6 +184,82 @@ Return plain text only — no JSON, no markdown. Write the note text directly.`,
   return msg.content[0].type === 'text' ? msg.content[0].text.trim() : ''
 }
 
+async function runPsychAssessment(
+  transcript: string,
+  medications: Medication[]
+): Promise<PsychAssessment> {
+  const medList = medications
+    .map((m) => `${m.name}${m.dose ? ` ${m.dose}` : ''}${m.frequency ? ` ${m.frequency}` : ''}`)
+    .join(', ')
+
+  const msg = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 3000,
+    system: `You are a board-certified psychiatrist providing clinical decision support for licensed prescribers. Apply DSM-5-TR criteria, APA practice guidelines, and evidence-based psychopharmacology. For prescriber use only.`,
+    messages: [{
+      role: 'user',
+      content: `Perform a comprehensive psychiatric assessment of this clinical encounter.
+
+Medications: ${medList || 'none documented'}
+
+Transcript:
+${transcript.slice(0, 4000)}
+
+Return ONLY valid JSON (no markdown):
+{
+  "diagnoses": [
+    {
+      "name": "Full DSM-5-TR diagnosis e.g. Major Depressive Disorder, recurrent, moderate",
+      "icd10": "e.g. F33.1",
+      "confidence": "high|moderate|low",
+      "criteriaEvidence": ["brief evidence from transcript supporting this criterion"]
+    }
+  ],
+  "treatmentResistance": null,
+  "protocols": [
+    {
+      "medication": "lowercase generic name",
+      "indication": "diagnosis this addresses",
+      "currentDose": "as documented or 'not specified'",
+      "targetDoseRange": "evidence-based range e.g. '100-200mg/day'",
+      "titrationNote": "practical titration guidance",
+      "doseStatus": "sub-therapeutic|therapeutic|above-guideline|unknown",
+      "lineOfTreatment": "1st|2nd|3rd|augmentation",
+      "monitoringRequired": ["specific monitoring items"],
+      "commonSideEffects": ["top 3-4 side effects to counsel on"]
+    }
+  ],
+  "labsRequired": ["Lab — timing, e.g. 'Lithium level — check 5 days after dose change'"],
+  "detectedScales": [
+    {
+      "scale": "PHQ-9",
+      "score": 14,
+      "severity": "moderate",
+      "interpretation": "Scores 10-14 indicate moderate depression"
+    }
+  ],
+  "cptCodes": {
+    "primary": "99214",
+    "description": "Office visit, established patient, moderate complexity",
+    "rationale": "brief rationale based on complexity and time",
+    "addOns": ["90833 — 30-min psychotherapy add-on if applicable"]
+  }
+}
+
+Rules: Only include detectedScales with EXPLICIT scores in transcript. Set treatmentResistance to null unless clearly evidenced. Return empty arrays where nothing applies.`,
+    }],
+  })
+  const text = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '{}'
+  return parseJSON<PsychAssessment>(text, {
+    diagnoses: [],
+    treatmentResistance: null,
+    protocols: [],
+    labsRequired: [],
+    detectedScales: [],
+    cptCodes: { primary: '', description: '', rationale: '', addOns: [] },
+  })
+}
+
 export async function POST(req: NextRequest) {
   const { transcript, insurancePlan, previousVisit } = await req.json()
 
@@ -240,6 +316,11 @@ export async function POST(req: NextRequest) {
           formulary?.paRequired ?? []
         )
         send({ step: 'note', status: 'done', data: { note } })
+
+        // 6. Psychiatric assessment
+        send({ step: 'psych', status: 'running' })
+        const psychAssessment = await runPsychAssessment(transcript, medications)
+        send({ step: 'psych', status: 'done', data: psychAssessment })
 
         send({ step: 'complete', status: 'done' })
       } catch (err) {
