@@ -10,6 +10,7 @@ import BerriesNotePanel from '@/components/BerriesNotePanel'
 import OutcomeTrends from '@/components/OutcomeTrends'
 import NextVisitPrep from '@/components/NextVisitPrep'
 import CouncilPanel from '@/components/CouncilPanel'
+import PsychNoteTemplate from '@/components/PsychNoteTemplate'
 import { AgentStepState, AnalysisResult, FormularyResult, Medication, Patient, Visit } from '@/lib/types'
 import { addVisit, getPatient, getPatients } from '@/lib/storage'
 
@@ -236,6 +237,9 @@ export default function Home() {
             <NextVisitPrep prep={patientVisits[0].result.nextVisitPrep} />
           </div>
         )}
+
+        {/* Psych note template */}
+        <PsychNoteTemplate />
 
         {/* Transcript */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
