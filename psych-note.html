@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Psych Note</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --text: #1e293b;
+    --text-2: #475569;
+    --text-3: #94a3b8;
+    --blue: #2563eb;
+    --blue-bg: #eff6ff;
+    --blue-border: #bfdbfe;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --red-border: #fecaca;
+    --green: #059669;
+    --green-bg: #ecfdf5;
+    --green-border: #a7f3d0;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --amber-border: #fde68a;
+    --slate: #475569;
+    --slate-bg: #f8fafc;
+    --slate-border: #cbd5e1;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+
+  html { background: var(--bg); }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(80px + var(--safe-bottom));
+  }
+
+  /* sticky header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: calc(var(--safe-top) + 12px) 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .header-title { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .header-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+  .btn-copy {
+    flex-shrink: 0;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.1s;
+    font-family: inherit;
+  }
+  .btn-copy:active { transform: scale(0.96); background: #0f172a; }
+  .btn-copy.copied { background: var(--green); }
+
+  /* reset button */
+  .btn-reset {
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--text-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+  }
+  .btn-reset:active { background: var(--bg); }
+
+  /* main layout */
+  .main { padding: 12px 12px 0; max-width: 600px; margin: 0 auto; }
+
+  /* card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-bottom: 10px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    padding: 14px 16px 6px;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: var(--border-light);
+    margin: 4px 0;
+  }
+
+  .chips-wrap {
+    padding: 8px 16px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* chips */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+    min-height: 36px;
+    line-height: 1.2;
+  }
+  .chip:active { transform: scale(0.94); }
+
+  /* blue (default) */
+  .chip-blue { border-color: var(--border); color: var(--text-2); background: var(--card); }
+  .chip-blue.on { border-color: var(--blue); background: var(--blue); color: #fff; }
+
+  /* red */
+  .chip-red { border-color: var(--border); color: var(--text-2); background: var(--card); }
+  .chip-red.on { border-color: var(--red); background: var(--red); color: #fff; }
+
+  /* green */
+  .chip-green { border-color: var(--border); color: var(--text-2); background: var(--card); }
+  .chip-green.on { border-color: var(--green); background: var(--green); color: #fff; }
+
+  /* amber */
+  .chip-amber { border-color: var(--border); color: var(--text-2); background: var(--card); }
+  .chip-amber.on { border-color: var(--amber); background: var(--amber); color: #fff; }
+
+  /* slate */
+  .chip-slate { border-color: var(--border); color: var(--text-2); background: var(--card); }
+  .chip-slate.on { border-color: var(--slate); background: var(--slate); color: #fff; }
+
+  /* note preview */
+  .note-preview {
+    background: var(--bg);
+    border-top: 1px solid var(--border-light);
+    padding: 12px 16px 16px;
+  }
+  .note-preview pre {
+    font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text-2);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 220px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .note-preview-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+
+  /* bottom copy bar */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + var(--safe-bottom));
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .btn-copy-big {
+    flex: 1;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.1s;
+    font-family: inherit;
+  }
+  .btn-copy-big:active { transform: scale(0.98); }
+  .btn-copy-big.copied { background: var(--green); }
+
+  .btn-share {
+    flex-shrink: 0;
+    background: var(--card);
+    color: var(--text-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+  }
+  .btn-share:active { background: var(--bg); }
+
+  /* section heading with icon */
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 16px 16px 0;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text);
+  }
+  .section-heading-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Psych Note</div>
+    <div class="header-sub">Tap to select &bull; Copy when done</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn-reset" onclick="resetAll()">Reset</button>
+    <button class="btn-copy" id="hdrCopy" onclick="copyNote(this)">Copy</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- VISIT TYPE -->
+  <div class="card">
+    <div class="section-label">Visit Type</div>
+    <div class="chips-wrap" id="grp-visittype"></div>
+
+    <div class="section-label" style="padding-top:4px">Chief Complaint</div>
+    <div class="chips-wrap" id="grp-cc"></div>
+  </div>
+
+  <!-- INTERVAL -->
+  <div class="card">
+    <div class="section-label">Interval History</div>
+    <div class="chips-wrap" id="grp-interval"></div>
+  </div>
+
+  <!-- MSE -->
+  <div class="card">
+    <div class="section-heading">
+      <div class="section-heading-dot" style="background:#6366f1"></div>
+      Mental Status Exam
+    </div>
+
+    <div class="section-label" style="padding-top:12px">Appearance</div>
+    <div class="chips-wrap" id="grp-appearance"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Behavior</div>
+    <div class="chips-wrap" id="grp-behavior"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Speech</div>
+    <div class="chips-wrap" id="grp-speech"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Mood <span style="font-weight:400;text-transform:none;letter-spacing:0">(patient's words)</span></div>
+    <div class="chips-wrap" id="grp-mood"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Affect</div>
+    <div class="chips-wrap" id="grp-affect"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Thought Process</div>
+    <div class="chips-wrap" id="grp-thoughtprocess"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Thought Content</div>
+    <div class="chips-wrap" id="grp-thoughtcontent"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Perceptions</div>
+    <div class="chips-wrap" id="grp-perceptions"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Cognition</div>
+    <div class="chips-wrap" id="grp-cognition"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Insight / Judgment</div>
+    <div class="chips-wrap" id="grp-insight"></div>
+  </div>
+
+  <!-- RISK -->
+  <div class="card">
+    <div class="section-heading">
+      <div class="section-heading-dot" style="background:#ef4444"></div>
+      Risk Assessment
+    </div>
+
+    <div class="section-label" style="padding-top:12px">Suicidal Ideation</div>
+    <div class="chips-wrap" id="grp-si"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Homicidal Ideation</div>
+    <div class="chips-wrap" id="grp-hi"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Self-Harm</div>
+    <div class="chips-wrap" id="grp-selfharm"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Access to Means</div>
+    <div class="chips-wrap" id="grp-means"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Protective Factors</div>
+    <div class="chips-wrap" id="grp-protective"></div>
+  </div>
+
+  <!-- DIAGNOSES -->
+  <div class="card">
+    <div class="section-heading">
+      <div class="section-heading-dot" style="background:#0ea5e9"></div>
+      Assessment / Diagnoses
+    </div>
+    <div class="chips-wrap" id="grp-diagnoses" style="padding-top:10px"></div>
+  </div>
+
+  <!-- PLAN -->
+  <div class="card">
+    <div class="section-heading">
+      <div class="section-heading-dot" style="background:#10b981"></div>
+      Plan
+    </div>
+
+    <div class="section-label" style="padding-top:12px">Medications</div>
+    <div class="chips-wrap" id="grp-meds"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Therapy</div>
+    <div class="chips-wrap" id="grp-therapy"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Labs / Monitoring</div>
+    <div class="chips-wrap" id="grp-labs"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Safety / Other</div>
+    <div class="chips-wrap" id="grp-safety"></div>
+    <div class="section-divider"></div>
+
+    <div class="section-label">Follow-up</div>
+    <div class="chips-wrap" id="grp-followup"></div>
+  </div>
+
+  <!-- NOTE PREVIEW -->
+  <div class="card" style="margin-bottom:0">
+    <div class="note-preview">
+      <div class="note-preview-label">Generated Note</div>
+      <pre id="notePreview">Select items above to build your note…</pre>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- BOTTOM BAR -->
+<div style="position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid #e2e8f0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:100;">
+  <button id="bigCopy" onclick="copyNote(this)" style="flex:1;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s;">
+    Copy Note
+  </button>
+  <button onclick="shareNote()" style="flex-shrink:0;background:#fff;color:#475569;border:1.5px solid #e2e8f0;border-radius:8px;padding:14px 16px;font-size:20px;cursor:pointer;font-family:inherit;">
+    &#x1F4E4;
+  </button>
+</div>
+
+<script>
+// ── data ──────────────────────────────────────────────────────────────────────
+const GROUPS = {
+  'visittype': {
+    multi: false, color: 'slate',
+    items: ['New Patient','Follow-up','Urgent / Crisis','Telehealth Follow-up']
+  },
+  'cc': {
+    multi: true, color: 'blue',
+    items: ['Depression','Anxiety','Mood instability','Psychosis','Insomnia',
+            'ADHD / attention','Trauma / PTSD','OCD','Panic attacks',
+            'Mania / hypomania','Medication management','Behavioral concerns']
+  },
+  'interval': {
+    multi: true, color: 'blue',
+    items: ['Improved since last visit','Stable since last visit','Worse since last visit',
+            'Medication adherent','Medication non-adherent','Side effects reported',
+            'New stressor identified','Sleep improved','Sleep worsened',
+            'Appetite normal','Appetite decreased','Appetite increased',
+            'Participating in therapy','Declined therapy']
+  },
+  'appearance': {
+    multi: true, color: 'blue',
+    items: ['Well-groomed','Casually dressed','Disheveled','Appropriate for age',
+            'Appears stated age','Appears older','Appears younger']
+  },
+  'behavior': {
+    multi: true, color: 'blue',
+    items: ['Cooperative','Pleasant','Guarded','Agitated','Restless',
+            'Psychomotor retardation','Good eye contact','Avoids eye contact']
+  },
+  'speech': {
+    multi: true, color: 'blue',
+    items: ['Normal rate & rhythm','Pressured','Slowed','Soft','Loud',
+            'Monotone','Articulate','Spontaneous']
+  },
+  'mood': {
+    multi: true, color: 'amber',
+    items: ['Euthymic','Depressed','Anxious','Irritable','Elevated',
+            'Dysphoric','Angry','Hopeless','Numb','OK']
+  },
+  'affect': {
+    multi: true, color: 'blue',
+    items: ['Full range','Congruent','Restricted','Blunted','Flat',
+            'Labile','Expansive','Incongruent']
+  },
+  'thoughtprocess': {
+    multi: true, color: 'blue',
+    items: ['Linear & logical','Goal-directed','Tangential','Circumstantial',
+            'Flight of ideas','Loose associations','Disorganized','Perseverative']
+  },
+  'thoughtcontent': {
+    multi: true, color: 'red',
+    items: ['No SI / HI','No delusions','No obsessions','Passive SI',
+            'Active SI — no plan','Active SI — with plan','Paranoid ideation',
+            'Grandiose delusions','Somatic delusions','Obsessive thoughts','Rumination']
+  },
+  'perceptions': {
+    multi: true, color: 'blue',
+    items: ['No hallucinations','Auditory hallucinations','Visual hallucinations',
+            'Tactile hallucinations','Commanding voices','Non-commanding voices',
+            'Derealization','Depersonalization']
+  },
+  'cognition': {
+    multi: true, color: 'blue',
+    items: ['Alert & oriented ×4','Intact recent memory','Intact remote memory',
+            'Good concentration','Impaired concentration','Memory deficits noted',
+            'Abstract thinking intact']
+  },
+  'insight': {
+    multi: true, color: 'green',
+    items: ['Insight: good','Insight: fair','Insight: poor',
+            'Judgment: good','Judgment: fair','Judgment: poor']
+  },
+  'si': {
+    multi: false, color: 'red',
+    items: ['None','Passive (wish to be dead)','Active — no plan',
+            'Active — with plan','Recent attempt']
+  },
+  'hi': {
+    multi: false, color: 'red',
+    items: ['None','Passive','Active — no plan','Active — with plan']
+  },
+  'selfharm': {
+    multi: false, color: 'red',
+    items: ['None','History — not current','Current non-suicidal self-injury']
+  },
+  'means': {
+    multi: true, color: 'amber',
+    items: ['Denied','Firearms in home','Medications accessible',
+            'Means restriction counseled']
+  },
+  'protective': {
+    multi: true, color: 'green',
+    items: ['Family support','Future orientation','Engaged in treatment',
+            'Religious / spiritual beliefs','Responsibility for children',
+            'Responsibility for pets','Reasons for living identified']
+  },
+  'diagnoses': {
+    multi: true, color: 'slate',
+    items: ['MDD — moderate','MDD — severe','MDD — in remission',
+            'Persistent depressive disorder','Bipolar I','Bipolar II','Cyclothymia',
+            'GAD','Panic disorder','Social anxiety disorder','Specific phobia',
+            'PTSD','Acute stress disorder','OCD',
+            'ADHD — combined','ADHD — inattentive',
+            'Schizophrenia','Schizoaffective disorder',
+            'Borderline PD','AUD','SUD — cannabis','SUD — stimulant',
+            'Insomnia disorder']
+  },
+  'meds': {
+    multi: true, color: 'blue',
+    items: ['Continue current medications','Dose increase','Dose decrease',
+            'New medication started','Medication discontinued','Taper initiated',
+            'Side effect management discussed','Generic substitution','Rx sent to pharmacy']
+  },
+  'therapy': {
+    multi: true, color: 'blue',
+    items: ['Continue individual therapy','Start individual therapy','CBT recommended',
+            'DBT skills recommended','Trauma-focused therapy','Group therapy',
+            'Family therapy','Therapy referral placed']
+  },
+  'labs': {
+    multi: true, color: 'amber',
+    items: ['CMP ordered','CBC ordered','Lithium level','Valproate level',
+            'TSH ordered','Fasting glucose / HbA1c','Lipid panel','UDS ordered',
+            'Weight / BMI documented','BP documented']
+  },
+  'safety': {
+    multi: true, color: 'green',
+    items: ['Safety plan reviewed','Crisis line provided (988)','ER precautions given',
+            'Voluntary hospitalization discussed','Involuntary hold considered',
+            'Collateral contact obtained','School / work note provided']
+  },
+  'followup': {
+    multi: false, color: 'blue',
+    items: ['1 week','2 weeks','1 month','6 weeks','3 months','PRN','ED if worsening']
+  },
+}
+
+// state: groupId -> Set of selected labels
+const STATE = {}
+Object.keys(GROUPS).forEach(id => { STATE[id] = new Set() })
+
+// ── render chips ──────────────────────────────────────────────────────────────
+function renderGroup(id) {
+  const cfg = GROUPS[id]
+  const wrap = document.getElementById('grp-' + id)
+  if (!wrap) return
+  wrap.innerHTML = ''
+  cfg.items.forEach(label => {
+    const el = document.createElement('button')
+    el.className = 'chip chip-' + cfg.color + (STATE[id].has(label) ? ' on' : '')
+    el.textContent = label
+    el.addEventListener('click', () => toggle(id, label, cfg.multi))
+    wrap.appendChild(el)
+  })
+}
+
+function toggle(id, label, multi) {
+  const s = STATE[id]
+  if (s.has(label)) {
+    s.delete(label)
+  } else {
+    if (!multi) s.clear()
+    s.add(label)
+  }
+  renderGroup(id)
+  updatePreview()
+}
+
+function resetAll() {
+  Object.keys(STATE).forEach(id => STATE[id].clear())
+  Object.keys(GROUPS).forEach(id => renderGroup(id))
+  updatePreview()
+}
+
+// ── note builder ──────────────────────────────────────────────────────────────
+function join(id) {
+  return [...STATE[id]].join(', ') || '—'
+}
+
+function buildNote() {
+  const date = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
+  return [
+    'PSYCHIATRIC PROGRESS NOTE',
+    'Date: ' + date,
+    'Visit Type: ' + join('visittype'),
+    '',
+    'CHIEF COMPLAINT',
+    join('cc'),
+    '',
+    'INTERVAL HISTORY',
+    join('interval'),
+    '',
+    'MENTAL STATUS EXAMINATION',
+    'Appearance:        ' + join('appearance'),
+    'Behavior:          ' + join('behavior'),
+    'Speech:            ' + join('speech'),
+    'Mood:              ' + join('mood'),
+    'Affect:            ' + join('affect'),
+    'Thought Process:   ' + join('thoughtprocess'),
+    'Thought Content:   ' + join('thoughtcontent'),
+    'Perceptions:       ' + join('perceptions'),
+    'Cognition:         ' + join('cognition'),
+    'Insight/Judgment:  ' + join('insight'),
+    '',
+    'RISK ASSESSMENT',
+    'Suicidal Ideation: ' + join('si'),
+    'Homicidal Ideation:' + join('hi'),
+    'Self-Harm:         ' + join('selfharm'),
+    'Access to Means:   ' + join('means'),
+    'Protective Factors:' + join('protective'),
+    '',
+    'ASSESSMENT / DIAGNOSES',
+    join('diagnoses'),
+    '',
+    'PLAN',
+    'Medications:  ' + join('meds'),
+    'Therapy:      ' + join('therapy'),
+    'Labs:         ' + join('labs'),
+    'Safety:       ' + join('safety'),
+    'Follow-up:    ' + join('followup'),
+    '',
+    '─'.repeat(40),
+    'Generated via Cleo Psych Note Template',
+  ].join('\n')
+}
+
+function updatePreview() {
+  document.getElementById('notePreview').textContent = buildNote()
+}
+
+// ── copy ──────────────────────────────────────────────────────────────────────
+async function copyNote(btn) {
+  const note = buildNote()
+  try {
+    await navigator.clipboard.writeText(note)
+  } catch {
+    // fallback for older iOS
+    const ta = document.createElement('textarea')
+    ta.value = note
+    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0'
+    document.body.appendChild(ta)
+    ta.focus()
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+  }
+  const origText = btn.textContent
+  btn.textContent = 'Copied!'
+  btn.style.background = '#059669'
+  setTimeout(() => {
+    btn.textContent = origText
+    btn.style.background = ''
+  }, 2000)
+  // sync both buttons
+  ['hdrCopy','bigCopy'].forEach(id => {
+    const b = document.getElementById(id)
+    if (b && b !== btn) {
+      const t = b.textContent
+      b.textContent = 'Copied!'
+      b.style.background = '#059669'
+      setTimeout(() => { b.textContent = t; b.style.background = '' }, 2000)
+    }
+  })
+}
+
+// ── share (iOS share sheet) ───────────────────────────────────────────────────
+async function shareNote() {
+  const note = buildNote()
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Psych Note', text: note })
+    } catch {}
+  } else {
+    copyNote(document.getElementById('bigCopy'))
+  }
+}
+
+// ── init ──────────────────────────────────────────────────────────────────────
+Object.keys(GROUPS).forEach(id => renderGroup(id))
+updatePreview()
+</script>
+</body>
+</html>
