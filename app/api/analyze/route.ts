@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { FormularyResult, Medication, Visit } from '@/lib/types'
+import { FormularyResult, Medication, MindMetrixAssessment, Visit } from '@/lib/types'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -86,7 +86,8 @@ async function synthesize(
   medications: Medication[],
   fdaData: Record<string, string>,
   formulary: FormularyResult | null,
-  previousVisit: Visit | null
+  previousVisit: Visit | null,
+  mindMetrix: MindMetrixAssessment | null
 ): Promise<object> {
   const medList = medications
     .map((m) => `${m.name}${m.dose ? ` ${m.dose}` : ''}${m.frequency ? ` ${m.frequency}` : ''}`)
@@ -104,6 +105,28 @@ async function synthesize(
     ? `\n\nFORMULARY FLAGS: PA required for ${formulary.paRequired.join(', ')}.`
     : ''
 
+  const mindMetrixSection = mindMetrix
+    ? (() => {
+        const elevated = mindMetrix.conditionScores
+          .filter((c) => c.flag)
+          .map((c) => `${c.condition} (${c.score}/100, ${c.severity})`)
+          .join(', ')
+        const allScores = mindMetrix.conditionScores
+          .map((c) => `${c.condition}: ${c.score}/100`)
+          .join(', ')
+        return `\n\nMINDMETRIX COMPREHENSIVE ASSESSMENT (ID: ${mindMetrix.assessmentId ?? 'N/A'}, completed ${mindMetrix.completedDate}):
+Elevated conditions (score >50): ${elevated || 'none'}
+All condition scores: ${allScores}
+Top clinical flags: ${mindMetrix.topFlags.join(', ') || 'none'}
+
+Cross-reference the current medication regimen against these validated assessment scores. Identify: (1) gaps where elevated conditions lack adequate pharmacological coverage, (2) alignment where medications directly address flagged conditions, (3) titration opportunities suggested by the severity scores. Your mindMetrixSummary must directly address what the assessment reveals relative to the current regimen.`
+      })()
+    : ''
+
+  const mindMetrixOutputField = mindMetrix
+    ? `\n  "mindMetrixSummary": "2-3 sentences: how assessment scores align with or diverge from the current medication regimen, what gaps exist for the flagged conditions, and one specific medication implication",`
+    : ''
+
   const msg = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
     max_tokens: 3000,
@@ -113,12 +136,12 @@ async function synthesize(
       content: `Analyze this medication regimen and provide comprehensive clinical decision support.
 
 Medications: ${medList || 'none detected'}
-FDA Interaction Data:\n${fdaSections || 'None available.'}${prevSection}${formularySection}
+FDA Interaction Data:\n${fdaSections || 'None available.'}${prevSection}${formularySection}${mindMetrixSection}
 
 Transcript:\n${transcript}
 
 Return ONLY JSON (no markdown):
-{
+{${mindMetrixOutputField}
   "summary": "2-3 sentence clinical summary",
   "recommendations": ["Use 'consider', 'may warrant review', 'prescriber should evaluate'"],
   "interactions": [{"drug1":"","drug2":"","description":"","severity":"mild|moderate|severe"}],
@@ -185,7 +208,7 @@ Return plain text only — no JSON, no markdown. Write the note text directly.`,
 }
 
 export async function POST(req: NextRequest) {
-  const { transcript, insurancePlan, previousVisit } = await req.json()
+  const { transcript, insurancePlan, previousVisit, mindMetrixAssessment } = await req.json()
 
   if (!transcript?.trim()) {
     return Response.json({ error: 'No transcript provided' }, { status: 400 })
@@ -199,12 +222,10 @@ export async function POST(req: NextRequest) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
 
       try {
-        // 1. Extract
         send({ step: 'extract', status: 'running' })
         const medications = await extractMedications(transcript)
         send({ step: 'extract', status: 'done', data: { medications } })
 
-        // 2. Formulary (optional — now includes cost estimates)
         let formulary: FormularyResult | null = null
         if (insurancePlan?.trim()) {
           send({ step: 'formulary', status: 'running' })
@@ -214,7 +235,6 @@ export async function POST(req: NextRequest) {
           send({ step: 'formulary', status: 'skipped' })
         }
 
-        // 3. OpenFDA
         send({ step: 'openfda', status: 'running' })
         const fdaData: Record<string, string> = {}
         await Promise.all(
@@ -225,14 +245,17 @@ export async function POST(req: NextRequest) {
         )
         send({ step: 'openfda', status: 'done', data: { found: Object.keys(fdaData).length } })
 
-        // 4. Synthesize (now outputs adherenceFlags, symptomScores, nextVisitPrep)
         send({ step: 'synthesize', status: 'running' })
-        const result = await synthesize(transcript, medications, fdaData, formulary, previousVisit ?? null) as {
-          recommendations?: string[]
-        }
+        const result = await synthesize(
+          transcript,
+          medications,
+          fdaData,
+          formulary,
+          previousVisit ?? null,
+          mindMetrixAssessment ?? null
+        ) as { recommendations?: string[] }
         send({ step: 'synthesize', status: 'done', data: result })
 
-        // 5. Berries note
         send({ step: 'note', status: 'running' })
         const note = await generateBerriesNote(
           medications,

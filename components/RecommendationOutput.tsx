@@ -24,7 +24,7 @@ const ADHERENCE_CATEGORY_STYLES: Record<string, string> = {
 
 const ADHERENCE_LABELS: Record<string, string> = {
   cost: 'Cost barrier',
-  forgetting: 'Adherence/forgetting',
+  forgetting: 'Adherence / forgetting',
   'side-effects': 'Side effect concern',
   avoidance: 'Avoidance',
   other: 'Adherence flag',
@@ -38,36 +38,53 @@ export default function RecommendationOutput({
   result: AnalysisResult
 }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
+      {/* MindMetrix-informed insight */}
+      {result.mindMetrixSummary && (
+        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 flex gap-3 shadow-sm">
+          <div className="shrink-0 mt-0.5">
+            <div className="w-5 h-5 rounded bg-teal-600 flex items-center justify-center">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-teal-700 uppercase tracking-widest mb-1">
+              MindMetrix Assessment Findings
+            </p>
+            <p className="text-sm text-teal-900 leading-relaxed">{result.mindMetrixSummary}</p>
+          </div>
+        </div>
+      )}
+
       {/* Disclaimer */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
-        <span className="text-amber-500 text-lg leading-tight shrink-0">⚠</span>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 shadow-sm">
+        <span className="text-amber-500 text-base leading-tight shrink-0 mt-0.5">⚠</span>
         <p className="text-sm text-amber-800 leading-relaxed">{result.disclaimer}</p>
       </div>
 
       {/* Adherence flags */}
       {result.adherenceFlags?.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="font-semibold text-slate-800 mb-3">
-            Adherence Signals
-            <span className="ml-2 text-xs font-normal text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-slate-800">Adherence Signals</h3>
+            <span className="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
               {result.adherenceFlags.length} detected
             </span>
-          </h3>
-          <div className="space-y-2.5">
+          </div>
+          <div className="space-y-2">
             {result.adherenceFlags.map((flag: AdherenceFlag, i: number) => (
               <div
                 key={i}
                 className={`p-3 rounded-lg border ${ADHERENCE_CATEGORY_STYLES[flag.category] ?? ADHERENCE_CATEGORY_STYLES.other}`}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold uppercase tracking-wide">
-                    {ADHERENCE_LABELS[flag.category] ?? 'Flag'}
-                  </span>
-                </div>
-                <p className="text-sm">{flag.signal}</p>
+                <p className="text-[10px] font-bold uppercase tracking-wide mb-1 opacity-70">
+                  {ADHERENCE_LABELS[flag.category] ?? 'Flag'}
+                </p>
+                <p className="text-sm leading-snug">{flag.signal}</p>
                 {flag.quote && (
-                  <p className="text-xs italic mt-1 opacity-70">"{flag.quote}"</p>
+                  <p className="text-xs italic mt-1 opacity-60">"{flag.quote}"</p>
                 )}
               </div>
             ))}
@@ -75,19 +92,19 @@ export default function RecommendationOutput({
         </div>
       )}
 
-      {/* Medications identified */}
+      {/* Medications */}
       {medications.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="font-semibold text-slate-800 mb-3">Medications Identified</h3>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-sm font-semibold text-slate-800 mb-3">Medications Identified</h3>
           <div className="flex flex-wrap gap-2">
             {medications.map((med, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 text-sm px-3 py-1.5 rounded-full border border-blue-100"
+                className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-800 text-sm px-3 py-1.5 rounded-full border border-indigo-100"
               >
-                <span className="font-medium capitalize">{med.name}</span>
-                {med.dose && <span className="text-blue-600">{med.dose}</span>}
-                {med.frequency && <span className="text-blue-500 text-xs">{med.frequency}</span>}
+                <span className="font-semibold capitalize">{med.name}</span>
+                {med.dose && <span className="text-indigo-500 text-xs">{med.dose}</span>}
+                {med.frequency && <span className="text-indigo-400 text-xs">{med.frequency}</span>}
               </span>
             ))}
           </div>
@@ -96,36 +113,36 @@ export default function RecommendationOutput({
 
       {/* Clinical summary */}
       {result.summary && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="font-semibold text-slate-800 mb-2">Clinical Summary</h3>
-          <p className="text-slate-700 leading-relaxed text-sm">{result.summary}</p>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-sm font-semibold text-slate-800 mb-2">Clinical Summary</h3>
+          <p className="text-slate-600 leading-relaxed text-sm">{result.summary}</p>
         </div>
       )}
 
       {/* Drug interactions */}
       {result.interactions?.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="font-semibold text-slate-800 mb-3">
-            FDA Interaction Alerts
-            <span className="ml-2 text-xs font-normal text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-slate-800">FDA Interaction Alerts</h3>
+            <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
               {result.interactions.length} flagged
             </span>
-          </h3>
-          <div className="space-y-3">
+          </div>
+          <div className="space-y-2.5">
             {result.interactions.map((interaction: DrugInteraction, i: number) => (
               <div
                 key={i}
                 className={`p-4 rounded-lg border ${SEVERITY_CARD[interaction.severity] ?? SEVERITY_CARD.mild}`}
               >
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="font-medium text-sm capitalize">{interaction.drug1}</span>
+                  <span className="font-semibold text-sm capitalize">{interaction.drug1}</span>
                   <span className="text-slate-400 text-xs">×</span>
-                  <span className="font-medium text-sm capitalize">{interaction.drug2}</span>
-                  <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${SEVERITY_BADGE[interaction.severity] ?? SEVERITY_BADGE.mild}`}>
+                  <span className="font-semibold text-sm capitalize">{interaction.drug2}</span>
+                  <span className={`ml-auto text-[11px] px-2 py-0.5 rounded-full font-semibold ${SEVERITY_BADGE[interaction.severity] ?? SEVERITY_BADGE.mild}`}>
                     {interaction.severity}
                   </span>
                 </div>
-                <p className="text-sm text-slate-600">{interaction.description}</p>
+                <p className="text-sm text-slate-600 leading-snug">{interaction.description}</p>
               </div>
             ))}
           </div>
@@ -134,12 +151,12 @@ export default function RecommendationOutput({
 
       {/* Recommendations */}
       {result.recommendations?.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="font-semibold text-slate-800 mb-3">Recommendations for Prescriber Review</h3>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-sm font-semibold text-slate-800 mb-3">Prescriber Recommendations</h3>
           <ul className="space-y-3">
             {result.recommendations.map((rec: string, i: number) => (
               <li key={i} className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
+                <span className="shrink-0 w-6 h-6 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
                   {i + 1}
                 </span>
                 <p className="text-slate-700 text-sm leading-relaxed">{rec}</p>

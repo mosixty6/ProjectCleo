@@ -10,7 +10,16 @@ import BerriesNotePanel from '@/components/BerriesNotePanel'
 import OutcomeTrends from '@/components/OutcomeTrends'
 import NextVisitPrep from '@/components/NextVisitPrep'
 import CouncilPanel from '@/components/CouncilPanel'
-import { AgentStepState, AnalysisResult, FormularyResult, Medication, Patient, Visit } from '@/lib/types'
+import MindMetrixPanel from '@/components/MindMetrixPanel'
+import {
+  AgentStepState,
+  AnalysisResult,
+  FormularyResult,
+  Medication,
+  MindMetrixAssessment,
+  Patient,
+  Visit,
+} from '@/lib/types'
 import { addVisit, getPatient, getPatients } from '@/lib/storage'
 
 const INITIAL_STEPS: AgentStepState[] = [
@@ -22,15 +31,13 @@ const INITIAL_STEPS: AgentStepState[] = [
 ]
 
 export default function Home() {
-  // Patient
   const [patients, setPatients] = useState<Patient[]>([])
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [insurancePlan, setInsurancePlan] = useState('')
+  const [mindMetrixAssessment, setMindMetrixAssessment] = useState<MindMetrixAssessment | null>(null)
 
-  // Transcript
   const [transcript, setTranscript] = useState('')
 
-  // Analysis
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [steps, setSteps] = useState<AgentStepState[]>(INITIAL_STEPS)
   const [medications, setMedications] = useState<Medication[]>([])
@@ -39,7 +46,6 @@ export default function Home() {
   const [berriesNote, setBerriesNote] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
 
-  // PA drafts
   const [draftingPA, setDraftingPA] = useState<string | null>(null)
   const [paDrafts, setPaDrafts] = useState<Record<string, string>>({})
 
@@ -56,7 +62,7 @@ export default function Home() {
       else if (event.status === 'done') {
         const { medications: meds = [] } = event.data as { medications: Medication[] }
         setMedications(meds)
-        updateStep('extract', { status: 'done', detail: `Found ${meds.length} medication${meds.length !== 1 ? 's' : ''}` })
+        updateStep('extract', { status: 'done', detail: `${meds.length} medication${meds.length !== 1 ? 's' : ''} found` })
       }
     }
     if (event.step === 'formulary') {
@@ -65,16 +71,16 @@ export default function Home() {
         const f = event.data as FormularyResult
         setFormulary(f)
         const paCount = f.paRequired?.length ?? 0
-        updateStep('formulary', { status: 'done', detail: paCount > 0 ? `${paCount} PA required` : 'All medications covered' })
+        updateStep('formulary', { status: 'done', detail: paCount > 0 ? `${paCount} PA required` : 'All covered' })
       } else if (event.status === 'skipped') {
-        updateStep('formulary', { status: 'skipped', detail: 'No insurance plan provided' })
+        updateStep('formulary', { status: 'skipped', detail: 'No insurance plan' })
       }
     }
     if (event.step === 'openfda') {
       if (event.status === 'running') updateStep('openfda', { status: 'running' })
       else if (event.status === 'done') {
         const { found = 0 } = event.data as { found: number }
-        updateStep('openfda', { status: 'done', detail: `FDA data for ${found} medication${found !== 1 ? 's' : ''}` })
+        updateStep('openfda', { status: 'done', detail: `${found} drug${found !== 1 ? 's' : ''} checked` })
       }
     }
     if (event.step === 'synthesize') {
@@ -114,7 +120,7 @@ export default function Home() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, insurancePlan, previousVisit }),
+        body: JSON.stringify({ transcript, insurancePlan, previousVisit, mindMetrixAssessment }),
       })
       if (!res.ok) throw new Error(`Server error: ${res.status}`)
       const reader = res.body?.getReader()
@@ -160,6 +166,7 @@ export default function Home() {
           result: finalResult,
           formulary: finalFormulary ?? undefined,
           berriesNote: finalNote,
+          mindMetrix: mindMetrixAssessment ?? undefined,
         }
         addVisit(selectedPatient.id, visit)
         const updated = getPatients()
@@ -199,129 +206,190 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Cleo</h1>
-            <p className="text-xs text-slate-500">Clinical Decision Support</p>
+      {/* Header */}
+      <header className="bg-slate-950 border-b border-white/10 sticky top-0 z-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {/* Cleo logo */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-md shrink-0">
+                <span className="text-white font-black text-sm tracking-tighter">C</span>
+              </div>
+              <div>
+                <p className="text-white font-bold text-base leading-none tracking-tight">Cleo</p>
+                <p className="text-slate-500 text-[10px] leading-none mt-0.5">Clinical Decision Support</p>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-white/10 hidden sm:block" />
+
+            {/* MindMetrix connection badge */}
+            <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium transition-colors ${
+              mindMetrixAssessment
+                ? 'bg-teal-950 border-teal-700/60 text-teal-300'
+                : 'bg-white/5 border-white/10 text-slate-600'
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                mindMetrixAssessment ? 'bg-teal-400' : 'bg-slate-600'
+              }`} />
+              <span>MindMetrix</span>
+              {mindMetrixAssessment && (
+                <span className="text-teal-400 font-semibold">· Connected</span>
+              )}
+            </div>
           </div>
-          <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100 font-medium">
-            Prescriber Support Only
+
+          <span className="text-[10px] sm:text-xs bg-white/5 text-slate-500 px-3 py-1.5 rounded-full border border-white/10 font-medium whitespace-nowrap">
+            Licensed Prescribers Only
           </span>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-6 py-8 space-y-5">
-        {/* Patient + insurance */}
-        <PatientPanel
-          patients={patients}
-          selected={selectedPatient}
-          insurancePlan={insurancePlan}
-          onSelect={setSelectedPatient}
-          onInsuranceChange={setInsurancePlan}
-          onPatientsChange={setPatients}
-        />
+      {/* Two-column layout */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <div className="lg:grid lg:grid-cols-[320px_1fr] lg:gap-6 lg:items-start">
 
-        {/* Outcome trends — shows if patient has 2+ visits */}
-        {patientVisits.length >= 2 && (
-          <OutcomeTrends visits={patientVisits} />
-        )}
-
-        {/* Next visit prep from last visit — surfaces at top before new analysis */}
-        {!result && patientVisits[0]?.result?.nextVisitPrep && (
-          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-            <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3">
-              Carry-over from last visit ({patientVisits[0].date})
-            </p>
-            <NextVisitPrep prep={patientVisits[0].result.nextVisitPrep} />
-          </div>
-        )}
-
-        {/* Transcript */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <label className="block">
-            <span className="text-sm font-semibold text-slate-700 block mb-1">Paste Transcript</span>
-            <span className="text-xs text-slate-400 block mb-3">
-              Export from Berries or paste clinical encounter notes
-            </span>
-            <textarea
-              value={transcript}
-              onChange={(e) => setTranscript(e.target.value)}
-              placeholder="Paste your clinical transcript here..."
-              rows={9}
-              className="w-full text-sm border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-slate-700 placeholder-slate-300"
+          {/* Left sidebar */}
+          <aside className="mb-6 lg:mb-0 lg:sticky lg:top-[64px] lg:max-h-[calc(100vh-80px)] lg:overflow-y-auto space-y-4 lg:pb-6">
+            <PatientPanel
+              patients={patients}
+              selected={selectedPatient}
+              insurancePlan={insurancePlan}
+              onSelect={setSelectedPatient}
+              onInsuranceChange={setInsurancePlan}
+              onPatientsChange={setPatients}
             />
-          </label>
-          <div className="mt-4 flex items-center justify-between">
-            <span className="text-xs text-slate-400">
-              {transcript.length > 0 ? `${wordCount} word${wordCount !== 1 ? 's' : ''}` : 'No transcript pasted'}
-            </span>
-            <button
-              onClick={runAnalysis}
-              disabled={!transcript.trim() || isAnalyzing}
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm px-6 py-2.5 rounded-lg transition-colors font-semibold flex items-center gap-2"
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Analyzing…
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Run Analysis
-                </>
-              )}
-            </button>
-          </div>
-        </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
-            <span className="text-red-500 shrink-0 font-bold">✕</span>
-            <div>
-              <p className="text-sm font-medium text-red-800">Analysis failed</p>
-              <p className="text-sm text-red-600 mt-0.5">{error}</p>
+            <MindMetrixPanel
+              assessment={mindMetrixAssessment}
+              onChange={setMindMetrixAssessment}
+            />
+
+            {showSteps && (
+              <AgentSteps steps={steps} hasMindMetrix={!!mindMetrixAssessment} />
+            )}
+          </aside>
+
+          {/* Main content */}
+          <main className="space-y-4 min-w-0">
+            {/* Outcome trends — multi-visit history */}
+            {patientVisits.length >= 2 && (
+              <OutcomeTrends visits={patientVisits} />
+            )}
+
+            {/* Carry-over from last visit */}
+            {!result && patientVisits[0]?.result?.nextVisitPrep && (
+              <div className="rounded-xl border border-indigo-100 bg-indigo-50 shadow-sm p-4">
+                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-3">
+                  Carry-over from last visit · {patientVisits[0].date}
+                </p>
+                <NextVisitPrep prep={patientVisits[0].result.nextVisitPrep} />
+              </div>
+            )}
+
+            {/* Transcript input */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-slate-800 mb-0.5">Clinical Transcript</p>
+                <p className="text-xs text-slate-400">
+                  Export from Berries or paste encounter notes
+                </p>
+              </div>
+
+              <textarea
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                placeholder="Paste your clinical transcript here…"
+                rows={10}
+                className="w-full text-sm border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-slate-700 placeholder-slate-300 leading-relaxed"
+              />
+
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-400">
+                    {transcript.length > 0 ? `${wordCount} word${wordCount !== 1 ? 's' : ''}` : 'No transcript'}
+                  </span>
+                  {mindMetrixAssessment && (
+                    <span className="flex items-center gap-1 text-xs text-teal-600 font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal-500 inline-block" />
+                      MindMetrix will inform synthesis
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  onClick={runAnalysis}
+                  disabled={!transcript.trim() || isAnalyzing}
+                  className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm px-6 py-2.5 rounded-lg transition-colors font-semibold flex items-center gap-2 shrink-0"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Analyzing…
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Run Analysis
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
 
-        {showSteps && <AgentSteps steps={steps} />}
+            {/* Error */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl shadow-sm p-4 flex gap-3">
+                <span className="text-red-500 shrink-0 font-bold text-sm mt-0.5">✕</span>
+                <div>
+                  <p className="text-sm font-semibold text-red-800">Analysis failed</p>
+                  <p className="text-sm text-red-600 mt-0.5">{error}</p>
+                </div>
+              </div>
+            )}
 
-        {formulary && result && (
-          <FormularyResults
-            formulary={formulary}
-            result={result}
-            onDraftPA={draftPA}
-            draftingPA={draftingPA}
-            paDrafts={paDrafts}
-          />
-        )}
+            {/* Formulary */}
+            {formulary && result && (
+              <FormularyResults
+                formulary={formulary}
+                result={result}
+                onDraftPA={draftPA}
+                draftingPA={draftingPA}
+                paDrafts={paDrafts}
+              />
+            )}
 
-        {result && <RecommendationOutput medications={medications} result={result} />}
+            {/* Recommendations + interactions + adherence */}
+            {result && <RecommendationOutput medications={medications} result={result} />}
 
-        {result && (
-          <CouncilPanel
-            transcript={transcript}
-            medications={medications}
-            result={result}
-          />
-        )}
+            {/* Council panel */}
+            {result && (
+              <CouncilPanel
+                transcript={transcript}
+                medications={medications}
+                result={result}
+              />
+            )}
 
-        {berriesNote && <BerriesNotePanel note={berriesNote} />}
+            {/* EHR note */}
+            {berriesNote && <BerriesNotePanel note={berriesNote} />}
 
-        {/* Next visit prep from current analysis */}
-        {result?.nextVisitPrep && <NextVisitPrep prep={result.nextVisitPrep} />}
+            {/* Next visit prep from current analysis */}
+            {result?.nextVisitPrep && <NextVisitPrep prep={result.nextVisitPrep} />}
 
-        {result && (
-          <FollowUpChat
-            analysisContext={{ medications, result }}
-            suggestedQuestions={result.followUpQuestions ?? []}
-          />
-        )}
-      </main>
+            {/* Follow-up chat */}
+            {result && (
+              <FollowUpChat
+                analysisContext={{ medications, result }}
+                suggestedQuestions={result.followUpQuestions ?? []}
+              />
+            )}
+          </main>
+        </div>
+      </div>
     </div>
   )
 }

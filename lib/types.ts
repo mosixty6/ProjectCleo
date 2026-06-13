@@ -54,6 +54,22 @@ export interface NextVisitPrep {
   decisionPoints: string[]
 }
 
+export interface MindMetrixConditionScore {
+  condition: string
+  domain: 'mood' | 'anxiety' | 'trauma' | 'adhd' | 'substance' | 'psychosis' | 'personality' | 'other'
+  score: number
+  severity: 'minimal' | 'mild' | 'moderate' | 'severe'
+  flag: boolean
+}
+
+export interface MindMetrixAssessment {
+  assessmentId?: string
+  completedDate: string
+  conditionScores: MindMetrixConditionScore[]
+  topFlags: string[]
+  notes?: string
+}
+
 export interface AnalysisResult {
   summary: string
   recommendations: string[]
@@ -63,6 +79,7 @@ export interface AnalysisResult {
   nextVisitPrep: NextVisitPrep | null
   followUpQuestions: string[]
   disclaimer: string
+  mindMetrixSummary?: string
 }
 
 export interface PADraft {
@@ -77,6 +94,7 @@ export interface Visit {
   result: AnalysisResult
   formulary?: FormularyResult
   berriesNote?: string
+  mindMetrix?: MindMetrixAssessment
 }
 
 export interface Patient {

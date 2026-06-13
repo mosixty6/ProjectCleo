@@ -36,15 +36,22 @@ export default function PatientPanel({
   const lastVisit: Visit | null = selected?.visits[0] ?? null
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-700">Patient</h3>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center shrink-0">
+            <svg className="w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-semibold text-slate-700">Patient</h3>
+        </div>
         {!adding && (
           <button
             onClick={() => setAdding(true)}
-            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+            className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
           >
-            + New patient
+            + New
           </button>
         )}
       </div>
@@ -58,18 +65,18 @@ export default function PatientPanel({
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             placeholder="Patient name or initials"
-            className="flex-1 text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
           <button
             onClick={handleCreate}
             disabled={!newName.trim()}
-            className="bg-blue-600 disabled:opacity-40 text-white text-sm px-3 py-2 rounded-lg font-medium"
+            className="bg-indigo-600 disabled:opacity-40 text-white text-sm px-3 py-2 rounded-lg font-semibold"
           >
             Add
           </button>
           <button
             onClick={() => { setAdding(false); setNewName('') }}
-            className="text-sm text-slate-400 px-2"
+            className="text-sm text-slate-400 hover:text-slate-600 px-2"
           >
             Cancel
           </button>
@@ -82,37 +89,41 @@ export default function PatientPanel({
             onSelect(p)
             if (p?.insurance) onInsuranceChange(p.insurance)
           }}
-          className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-700"
         >
           <option value="">— No patient selected —</option>
           {patients.map((p) => (
             <option key={p.id} value={p.id}>
               {p.name}
-              {p.visits.length > 0 ? ` (${p.visits.length} visit${p.visits.length !== 1 ? 's' : ''})` : ''}
+              {p.visits.length > 0 ? ` · ${p.visits.length} visit${p.visits.length !== 1 ? 's' : ''}` : ''}
             </option>
           ))}
         </select>
       )}
 
       <div>
-        <label className="block text-xs text-slate-500 mb-1">Insurance plan (for formulary check)</label>
+        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">
+          Insurance plan
+        </label>
         <input
           type="text"
           value={insurancePlan}
           onChange={(e) => onInsuranceChange(e.target.value)}
-          placeholder="e.g. Aetna HMO, Medicare Part D, BCBS PPO"
-          className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="e.g. Aetna HMO, Medicare Part D"
+          className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-700 placeholder-slate-300"
         />
       </div>
 
       {lastVisit && (
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
-          <p className="text-xs font-medium text-blue-800 mb-1">
-            Last visit: {lastVisit.date}
+        <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3">
+          <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wide mb-1">
+            Last visit · {lastVisit.date}
           </p>
-          <p className="text-xs text-blue-700">
-            {lastVisit.result.recommendations.length} open recommendation{lastVisit.result.recommendations.length !== 1 ? 's' : ''} •{' '}
-            {lastVisit.medications.map((m) => m.name).join(', ')}
+          <p className="text-xs text-indigo-700 leading-snug">
+            {lastVisit.result.recommendations.length} recommendation{lastVisit.result.recommendations.length !== 1 ? 's' : ''}
+            {lastVisit.medications.length > 0 && (
+              <span className="text-indigo-500"> · {lastVisit.medications.map((m) => m.name).join(', ')}</span>
+            )}
           </p>
         </div>
       )}
